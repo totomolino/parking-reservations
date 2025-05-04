@@ -39,6 +39,7 @@ function App() {
             <th>Phone</th>
             <th>Priority</th>
             <th>Reservation Time</th>
+            <th>Slot</th>
             <th>New Hire</th>
             <th>Early?</th>
           </tr>
@@ -51,6 +52,7 @@ function App() {
               <td>{entry.phone}</td>
               <td>{entry.priority}</td>
               <td>{entry.reservation_timestamp}</td>
+              <td>{entry.slot}</td>
               <td>{entry.is_new ? '✅' : '❌'}</td>
               <td>{entry.is_early ? '✅' : '❌'}</td>
             </tr>
