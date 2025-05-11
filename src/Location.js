@@ -68,6 +68,7 @@ function Location() {
       }
     }
   };
+  const position = [targetLatitude, targetLongitude]; // Set initial position for the map
 
   // The map ref is no longer required in React-Leaflet
   return (
@@ -84,27 +85,17 @@ function Location() {
         <p>Your location has been sent to the system.</p>
       )}
 
-      {/* React-Leaflet Map */}
-      <MapContainer
-        center={[targetLatitude, targetLongitude]} // Set the map center
-        zoom={13} // Set the zoom level
-        style={{ height: '500px', width: '80%', margin: '0 auto' }} // Style the map
-        className="map-container"
-      >
-        {/* Tile Layer from OpenStreetMap */}
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-
-        {/* Marker for the target location */}
-        <Marker position={[targetLatitude, targetLongitude]}>
-          <Popup>Target Location</Popup>
-        </Marker>
-
-        {/* Marker for the user's location */}
-        <UserLocationMarker />
-      </MapContainer>
+    <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <Marker position={position}>
+        <Popup>
+          A pretty CSS3 popup. <br /> Easily customizable.
+        </Popup>
+      </Marker>
+    </MapContainer>
     </div>
   );
 }
