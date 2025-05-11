@@ -1,0 +1,101 @@
+/* Location.css */
+
+/* Global Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5; /* Light gray background */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.App {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow around the app */
+  text-align: center;
+  width: 100%; /* Full width */
+  max-width: 800px; /* Increase max-width to 800px */
+  margin: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #007bff; /* Button color */
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+p {
+  font-size: 16px;
+  margin-top: 20px;
+  color: #555;
+}
+
+.map-container {
+  width: 100%; /* Full width of the container */
+  height: 500px; /* Set a consistent height for the map */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  margin-bottom: 20px; /* Add space below the map */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Center the content vertically and horizontally */
+.App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .App {
+    width: 90%; /* Make the app container a little wider on smaller screens */
+  }
+
+  h1 {
+    font-size: 20px; /* Adjust heading size for smaller screens */
+  }
+
+  button {
+    width: 100%; /* Make the button full width on small screens */
+  }
+
+  .map-container {
+    height: 400px; /* Adjust the height of the map on small screens */
+  }
+}

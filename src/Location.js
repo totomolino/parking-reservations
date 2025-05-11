@@ -68,34 +68,46 @@ function Location() {
       }
     }
   };
-  const position = [targetLatitude, targetLongitude]; // Set initial position for the map
 
   // The map ref is no longer required in React-Leaflet
   return (
     <div className="App">
       <h1>Location Check-in</h1>
 
+      {/* Conditionally render content */}
       {!locationSent ? (
         <>
           <button onClick={sendLocation}>Send My Location</button>
           {error && <p className="error">{error}</p>}
-          {distanceMessage && <p>{distanceMessage}</p>}
+          {distanceMessage && <p>{distanceMessage}</p>} {/* Show the distance message */}
         </>
       ) : (
-        <p>Your location has been sent to the system.</p>
+        <>
+          <p>Your location has been sent to the system.</p> {/* Confirmation message */}
+          {distanceMessage && <p>{distanceMessage}</p>} {/* Keep the distance message visible */}
+        </>
       )}
 
-    <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <Marker position={position}>
-        <Popup>
-          A pretty CSS3 popup. <br /> Easily customizable.
-        </Popup>
-      </Marker>
-    </MapContainer>
+      {/* React-Leaflet Map */}
+      <MapContainer
+        center={[targetLatitude, targetLongitude]} // Set the map center
+        zoom={13} // Set the zoom level
+        className="map-container"
+      >
+        {/* Tile Layer from OpenStreetMap */}
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+
+        {/* Marker for the target location */}
+        <Marker position={[targetLatitude, targetLongitude]}>
+          <Popup>ZS office</Popup>
+        </Marker>
+
+        {/* Marker for the user's location */}
+        <UserLocationMarker />
+      </MapContainer>
     </div>
   );
 }
