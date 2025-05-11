@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import L from 'leaflet'; // Import Leaflet library for displaying the map
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // React-Leaflet components
+import L from 'leaflet'; // Leaflet library for the marker
+import { useMap } from 'react-leaflet';
 import './Location.css'; // Import your CSS for styling
 
 function Location() {
@@ -7,7 +9,7 @@ function Location() {
   const [error, setError] = useState(null); // Track any errors
   const [distanceMessage, setDistanceMessage] = useState(""); // Track distance message
 
-  // Target coordinates (the reference location)
+  // Target coordinates
   const targetLatitude = -34.546860404019675;
   const targetLongitude = -58.45813954034876;
 
@@ -67,30 +69,7 @@ function Location() {
     }
   };
 
-  useEffect(() => {
-    // Initialize the map after the component has mounted
-    const map = L.map('map').setView([targetLatitude, targetLongitude], 13);
-
-    // Add OpenStreetMap tile layer (no API key required)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
-
-    // Add a marker for the target location
-    L.marker([targetLatitude, targetLongitude]).addTo(map).bindPopup('Target Location');
-
-    // Add a marker for the user's current location
-    navigator.geolocation.getCurrentPosition((position) => {
-      const { latitude, longitude } = position.coords;
-      L.marker([latitude, longitude]).addTo(map).bindPopup('Your Location').openPopup();
-      map.setView([latitude, longitude], 13); // Center the map on user's location
-    });
-
-    return () => {
-      map.remove(); // Clean up the map when the component unmounts
-    };
-  }, []); // Empty dependency array to run only once when the component mounts
-
+  // The map ref is no longer required in React-Leaflet
   return (
     <div className="App">
       <h1>Location Check-in</h1>
@@ -105,10 +84,47 @@ function Location() {
         <p>Your location has been sent to the system.</p>
       )}
 
-      {/* Display Map */}
-      <div id="map" className="map-container"></div> {/* Map container */}
+      {/* React-Leaflet Map */}
+      <MapContainer
+        center={[targetLatitude, targetLongitude]} // Set the map center
+        zoom={13} // Set the zoom level
+        style={{ height: '500px', width: '80%', margin: '0 auto' }} // Style the map
+        className="map-container"
+      >
+        {/* Tile Layer from OpenStreetMap */}
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+
+        {/* Marker for the target location */}
+        <Marker position={[targetLatitude, targetLongitude]}>
+          <Popup>Target Location</Popup>
+        </Marker>
+
+        {/* Marker for the user's location */}
+        <UserLocationMarker />
+      </MapContainer>
     </div>
   );
 }
+
+// Custom component to add the user's current location as a marker
+const UserLocationMarker = () => {
+  const map = useMap(); // Get map reference from React-Leaflet
+
+  useEffect(() => {
+    // Get the user's current location
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+
+      // Add a marker for the user's location
+      L.marker([latitude, longitude]).addTo(map).bindPopup('Your Location').openPopup();
+      map.setView([latitude, longitude], 13); // Center the map on the user's location
+    });
+  }, [map]);
+
+  return null;
+};
 
 export default Location;
