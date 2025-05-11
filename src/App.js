@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
 import './App.css';
 
-function App() {
+// Component for the Dashboard (your original code)
+function Dashboard() {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Fetch parking assignments
     fetch('http://18.216.164.92:3000/today_assignments')
       .then((res) => {
         if (!res.ok) {
@@ -60,6 +63,80 @@ function App() {
         </tbody>
       </table>
     </div>
+  );
+}
+
+// Component for the Location Page
+function Location() {
+  useEffect(() => {
+    // Extract user_id from URL query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');
+
+    if (userId) {
+      // Check if the location has already been sent in the current session
+      const locationSent = sessionStorage.getItem('locationSent');
+
+      if (!locationSent) {
+        // Get the user's location if not already sent
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+
+            // Send location data to the API
+            fetch(`http://18.216.164.92:3000/save_location?user_id=${userId}&latitude=${latitude}&longitude=${longitude}`, {
+              method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Location saved:', data);
+
+              // Mark that location has been sent for the session
+              sessionStorage.setItem('locationSent', 'true');
+            })
+            .catch(error => {
+              console.error('Error saving location:', error);
+            });
+          });
+        } else {
+          console.log("Geolocation is not supported by this browser.");
+        }
+      } else {
+        console.log("Location has already been sent for this session.");
+      }
+    }
+  }, []);
+
+  return (
+    <div className="App">
+      <h1>Location Check-in</h1>
+      <p>Your location has been sent to the system if you have not checked in already.</p>
+    </div>
+  );
+}
+
+// Main App Component with Router
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <nav>
+          <ul>
+            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="/location">Check-in Location</Link></li>
+          </ul>
+        </nav>
+
+        <Switch>
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/location" component={Location} />
+          <Route path="/" exact>
+            <h2>Welcome to the Parking App</h2>
+            <p>Please choose a page to visit:</p>
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
 }
 
