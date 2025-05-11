@@ -66,51 +66,55 @@ function Dashboard() {
   );
 }
 
-// Component for the Location Page
 function Location() {
-  useEffect(() => {
+  const [locationSent, setLocationSent] = useState(false); // Track if location has been sent
+  const [error, setError] = useState(null); // Track any errors
+
+  // Function to handle sending location
+  const sendLocation = () => {
     // Extract user_id from URL query params
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('user_id');
 
     if (userId) {
-      // Check if the location has already been sent in the current session
-      const locationSent = sessionStorage.getItem('locationSent');
+      // Get the user's location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
 
-      if (!locationSent) {
-        // Get the user's location if not already sent
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((position) => {
-            const { latitude, longitude } = position.coords;
-
-            // Send location data to the API
-            fetch(`http://18.216.164.92:3000/save_location?user_id=${userId}&latitude=${latitude}&longitude=${longitude}`, {
-              method: 'GET',
-            })
-            .then(response => response.json())
-            .then(data => {
-              console.log('Location saved:', data);
-
-              // Mark that location has been sent for the session
-              sessionStorage.setItem('locationSent', 'true');
-            })
-            .catch(error => {
-              console.error('Error saving location:', error);
-            });
+          // Send location data to the API
+          fetch(`http://18.216.164.92:3000/save_location?user_id=${userId}&latitude=${latitude}&longitude=${longitude}`, {
+            method: 'GET',
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Location saved:', data);
+            setLocationSent(true); // Update state to reflect that the location was sent
+          })
+          .catch(error => {
+            console.error('Error saving location:', error);
+            setError('Error saving location. Please try again.');
           });
-        } else {
-          console.log("Geolocation is not supported by this browser.");
-        }
+        });
       } else {
-        console.log("Location has already been sent for this session.");
+        console.log("Geolocation is not supported by this browser.");
+        setError('Geolocation is not supported by this browser.');
       }
     }
-  }, []);
+  };
 
   return (
     <div className="App">
       <h1>Location Check-in</h1>
-      <p>Your location has been sent to the system if you have not checked in already.</p>
+
+      {!locationSent ? (
+        <>
+          <button onClick={sendLocation}>Send My Location</button>
+          {error && <p className="error">{error}</p>}
+        </>
+      ) : (
+        <p>Your location has been sent to the system.</p>
+      )}
     </div>
   );
 }
