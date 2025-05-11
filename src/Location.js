@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import L from 'leaflet'; // Leaflet library for displaying the map
-import './Location.css'; // Import CSS file for styling
+import L from 'leaflet'; // Import Leaflet library for displaying the map
+import './Location.css'; // Import your CSS for styling
 
 function Location() {
-  const [locationSent, setLocationSent] = useState(false);
-  const [error, setError] = useState(null);
-  const [distanceMessage, setDistanceMessage] = useState("");
+  const [locationSent, setLocationSent] = useState(false); // Track if location has been sent
+  const [error, setError] = useState(null); // Track any errors
+  const [distanceMessage, setDistanceMessage] = useState(""); // Track distance message
 
-  // Target coordinates
+  // Target coordinates (the reference location)
   const targetLatitude = -34.546860404019675;
   const targetLongitude = -58.45813954034876;
 
@@ -71,24 +71,23 @@ function Location() {
     // Initialize the map after the component has mounted
     const map = L.map('map').setView([targetLatitude, targetLongitude], 13);
 
-    // Add OpenStreetMap tile layer
+    // Add OpenStreetMap tile layer (no API key required)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    // Add marker for target location
+    // Add a marker for the target location
     L.marker([targetLatitude, targetLongitude]).addTo(map).bindPopup('Target Location');
 
-    // Add marker for the user's current location
+    // Add a marker for the user's current location
     navigator.geolocation.getCurrentPosition((position) => {
       const { latitude, longitude } = position.coords;
       L.marker([latitude, longitude]).addTo(map).bindPopup('Your Location').openPopup();
-      map.setView([latitude, longitude], 13); // Center map on user's location
+      map.setView([latitude, longitude], 13); // Center the map on user's location
     });
 
     return () => {
-      // Clean up the map when the component unmounts
-      map.remove();
+      map.remove(); // Clean up the map when the component unmounts
     };
   }, []); // Empty dependency array to run only once when the component mounts
 
@@ -107,7 +106,7 @@ function Location() {
       )}
 
       {/* Display Map */}
-      <div id="map" className="map-container"></div> {/* Add the class for styling */}
+      <div id="map" className="map-container"></div> {/* Map container */}
     </div>
   );
 }
