@@ -10,7 +10,12 @@ function Dashboard() {
 
   useEffect(() => {
     // Fetch parking assignments
-    fetch('https://brief-stable-penguin.ngrok-free.app/today_assignments')
+    fetch('https://brief-stable-penguin.ngrok-free.app/today_assignments',{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
@@ -84,7 +89,10 @@ function Location() {
 
           // Send location data to the API
           fetch(`https://brief-stable-penguin.ngrok-free.app/save_location?user_id=${userId}&latitude=${latitude}&longitude=${longitude}`, {
-            method: 'GET',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           })
           .then(response => response.json())
           .then(data => {
