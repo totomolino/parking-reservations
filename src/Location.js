@@ -1,6 +1,6 @@
-// Location.js
 import React, { useState, useEffect } from 'react';
 import L from 'leaflet'; // Leaflet library for displaying the map
+import './Location.css'; // Import CSS file for styling
 
 function Location() {
   const [locationSent, setLocationSent] = useState(false);
@@ -107,7 +107,7 @@ function Location() {
       )}
 
       {/* Display Map */}
-      <div id="map" style={{ height: '400px', width: '100%' }}></div>
+      <div id="map" className="map-container"></div> {/* Add the class for styling */}
     </div>
   );
 }

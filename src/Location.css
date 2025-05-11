@@ -1,0 +1,42 @@
+/* Location.css */
+
+/* Center the map container */
+.map-container {
+  width: 80%; /* Adjust the width of the map */
+  height: 400px; /* Set the height of the map */
+  margin: 0 auto; /* Center the map horizontally */
+  border: 2px solid #ddd; /* Add a border to the box */
+  border-radius: 8px; /* Round the corners */
+  background-color: #f9f9f9; /* Optional background color for the box */
+}
+
+/* Center the content vertically and horizontally */
+.App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+p {
+  margin-top: 10px;
+}
