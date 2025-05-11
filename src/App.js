@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
 
 // Component for the Dashboard (your original code)
@@ -127,14 +127,11 @@ function App() {
           </ul>
         </nav>
 
-        <Switch>
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/location" component={Location} />
-          <Route path="/" exact>
-            <h2>Welcome to the Parking App</h2>
-            <p>Please choose a page to visit:</p>
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/location" element={<Location />} />
+          <Route path="/" element={<h2>Welcome to the Parking App</h2>} />
+        </Routes>
       </div>
     </Router>
   );
