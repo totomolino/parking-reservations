@@ -24,6 +24,14 @@ html, body, #root {
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
+  color: #fff;
+}
+
+.logo-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-left: 1rem;
 }
 
 .nav-links {

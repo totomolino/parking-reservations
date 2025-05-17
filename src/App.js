@@ -10,6 +10,7 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
+          <img src="/zs_logo.png" alt="Logo" className="logo-image" />
           <h1 className="logo">ZS Parking App</h1>
           <nav>
             <ul className="nav-links">
