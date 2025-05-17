@@ -1,0 +1,62 @@
+.parking-comparison {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status-metric {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.health-indicator {
+  font-weight: bold;
+}
+
+.health-indicator.healthy {
+  color: green;
+}
+
+.health-indicator.unhealthy {
+  color: red;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #c3c1c1;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.buttons button:hover {
+  background: #f3c796;
+}
+
+.buttons button.active {
+  background: #e27c07;
+  color: #fff;
+  border-color: #000000;
+  border-width: 3px;
+}
+
+.assignment-list {
+  list-style: none;
+  padding: 0;
+}
+
+.assignment-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
