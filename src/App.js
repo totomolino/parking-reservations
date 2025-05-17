@@ -1,28 +1,43 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
-import Location from './Location'; // Import the Location component
-import Dashboard from './Dashboard'; // Import the Dashboard component
+import Location from './Location';
+import Assignements from './Assignements';
 
-
-
-// Main App Component with Router
 function App() {
   return (
     <Router>
       <div className="App">
-        <nav>
-          <ul>
-            <li><Link to="/dashboard">Dashboard</Link></li>
-            <li><Link to="/location">Check-in Location</Link></li>
-          </ul>
-        </nav>
+        <header className="App-header">
+          <h1 className="logo">ZS Parking App</h1>
+          <nav>
+            <ul className="nav-links">
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/Assignements">Assignements</Link></li>
+              <li><Link to="/dashboard">Cancellations</Link></li>
+            </ul>
+          </nav>
+        </header>
 
-        <Routes>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/location" element={<Location />} /> {/* Add the Location route */}
-          <Route path="/" element={<h2>Welcome to the Parking App</h2>} />
-        </Routes>
+        <main className="App-content">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <div className="welcome">
+                  <h2>Welcome to the Parking App</h2>
+                  <p>Your one-stop solution for parking management.</p>
+                </div>
+              }
+            />
+            <Route path="/assignements" element={<Assignements />} />
+            <Route path="/location" element={<Location />} />
+          </Routes>
+        </main>
+
+        <footer className="App-footer">
+          <p>&copy; {new Date().getFullYear()} Parking App. All rights reserved.</p>
+        </footer>
       </div>
     </Router>
   );

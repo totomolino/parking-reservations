@@ -1,49 +1,68 @@
-/* App.css */
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f5f5f5; /* Light gray background */
+html, body, #root {
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7fa;
 }
 
 .App {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow around the app */
-  text-align: center;
-  width: 100%; /* Use full width */
-  max-width: 900px; /* Increase the max-width for better screen usage */
-  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1em;
+.App-header {
+  background-color: #e27c07;
+  padding: 1rem 2rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
-}
-
-thead {
-  background-color: #f0f0f0;
-}
-
-.loader {
-  font-size: 1.2em;
-  margin-top: 20px;
-}
-
-.error {
-  color: red;
+.logo {
+  font-size: 1.5rem;
   font-weight: bold;
-  margin-top: 20px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+}
+
+.nav-links a:hover {
+  opacity: 0.8;
+}
+
+.App-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.welcome h2 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.welcome p {
+  color: #555;
+  font-size: 1rem;
+}
+
+.App-footer {
+  background-color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+  border-top: 1px solid #e0e0e0;
 }

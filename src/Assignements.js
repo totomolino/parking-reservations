@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 // Component for the Dashboard (your original code)
-function Dashboard() {
+function Assignements() {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,4 +69,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default Assignements;
