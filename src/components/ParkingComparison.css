@@ -47,7 +47,7 @@
 .buttons button.active {
   background: #e27c07;
   color: #fff;
-  border-color: #000000;
+  border-color: #000;
   border-width: 3px;
 }
 
@@ -59,4 +59,65 @@
 .assignment-list li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
+}
+
+/* New slots & WhatsApp button formatting */
+.slots {
+  margin-bottom: 2rem;
+}
+
+.slots-list {
+  list-style: none;
+  padding: 0;
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #eee;
+  min-height: 3rem;
+}
+
+.slot-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.slot-number {
+  font-weight: 500;
+}
+
+.slot-status.assigned {
+  color: #2e7d32;
+}
+
+.slot-status.pending {
+  color: #f57c00;
+}
+
+.whatsapp-button {
+  padding: 0.4rem 0.8rem;
+  background: #25d366;
+  color: #fff;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.3s;
+}
+
+.whatsapp-button:hover {
+  background: #1eb057;
+}
+
+
+.waiting-list h3 {
+  margin-top: 0;
+}
+
+.no-waiters {
+  font-style: italic;
+  color: #666;
 }

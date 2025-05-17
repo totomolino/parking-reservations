@@ -6,6 +6,13 @@ export default function ParkingComparison() {
   const [selected, setSelected] = useState('yesterday');
   const [health, setHealth] = useState(null);
 
+  // Helper to build WhatsApp link
+  const buildWhatsAppLink = (phone, message) => {
+    const clean = phone.replace(/\D/g, '');
+    const text = encodeURIComponent(message);
+    return `https://wa.me/${clean}?text=${text}`;
+  };
+  
   // Fetch parking data
   useEffect(() => {
     fetch('https://brief-stable-penguin.ngrok-free.app/parking-data', {
@@ -46,15 +53,11 @@ export default function ParkingComparison() {
   const healthClass = health === 'OK' ? 'healthy' : 'unhealthy';
 
   return (
-    <div className="parking-comparison">
-      <div className="status-metric">
-        <strong>System Status:</strong>{' '}
-        {health ? (
-          <span className={`health-indicator ${healthClass}`}>{health}</span>
-        ) : (
-          <span>Loading...</span>
-        )}
-      </div>
+    <section className="parking-comparison">
+      <header className="status-metric">
+        <strong>System Status:</strong>
+        <span className={`health-indicator ${healthClass}`}>{health || '...'}</span>
+      </header>
 
       <div className="buttons">
         <button
@@ -71,25 +74,54 @@ export default function ParkingComparison() {
         </button>
       </div>
 
-      <h3>Parking Slots for {current.parkingDate}</h3>
-      <ul>
-        {current.parkingSlots.map((slot) => (
-          <li key={slot.number}>
-            Slot {slot.number} - {slot.status}{slot.assignedTo ? ` (to ${slot.assignedTo})` : ''}
-          </li>
-        ))}
-      </ul>
+      <article className="slots">
+        <h3>Parking Slots for {current.parkingDate}</h3>
+        <ul className="slots-list">
+          {current.parkingSlots.map(slot => (
+            <li key={slot.number} className="slot-item">
+              <div className="slot-info">
+                <span className="slot-number">Slot {slot.number}</span>
+                <span className={`slot-status ${slot.status}`}>{slot.status}</span>
+                <span className="slot-assigned">{slot.assignedTo}</span>
+              </div>
 
-      <h3>Waiting List</h3>
-      {current.waitingList.length ? (
-        <ul>
-          {current.waitingList.map((person, idx) => (
-            <li key={idx}>{person.name}</li>
+              {selected === 'today' && (
+                <a
+                  href={buildWhatsAppLink(
+                    slot.phone,
+                    slot.status === 'assigned'
+                      ? `Hello ${slot.assignedTo}, please check in for your parking slot ${slot.number}.`
+                      : `Hi, are you going to accept parking slot ${slot.number}?`
+                  )}
+                  title={
+                    slot.status === 'assigned'
+                      ? `Hello ${slot.assignedTo}, please check in for your parking slot ${slot.number}.`
+                      : `Hi, are you going to accept parking slot ${slot.number}?`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whatsapp-button"
+                >
+                  WhatsApp
+                </a>
+              )}
+            </li>
           ))}
         </ul>
-      ) : (
-        <p>No one on the waiting list.</p>
-      )}
-    </div>
+      </article>
+
+      <article className="waiting-list">
+        <h3>Waiting List</h3>
+        {current.waitingList.length ? (
+          <ul>
+            {current.waitingList.map((person, idx) => (
+              <li key={idx}>{person.name}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="no-waiters">No one on the waiting list.</p>
+        )}
+      </article>
+    </section>
   );
 }
