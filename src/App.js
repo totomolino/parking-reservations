@@ -4,6 +4,7 @@ import './App.css';
 import ParkingComparison from './components/ParkingComparison';
 import Assignements from './components/Assignements';
 import Location from './components/Location';
+import Home from './components/Home';
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
 
         <main className="App-content">
           <Routes>
-            <Route path="/" element={<ParkingComparison />} />
+            <Route path="/" element={<Home/>} />
             <Route path="/assignements" element={<Assignements />} />
             <Route path="/location" element={<Location />} />
           </Routes>

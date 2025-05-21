@@ -1,0 +1,7 @@
+.Home{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+}

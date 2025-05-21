@@ -1,6 +1,8 @@
 .parking-comparison {
   max-width: 600px;
-  margin: 2rem auto;
+  width: 70vw;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
   padding: 1rem;
   background: #fff;
   border-radius: 8px;
