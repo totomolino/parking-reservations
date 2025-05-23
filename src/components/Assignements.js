@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-// Component for the Dashboard (your original code)
-function Assignements() {
+import './Assignements.css';
+
+function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch parking assignments
     fetch('https://brief-stable-penguin.ngrok-free.app/today_assignments', {
       method: 'GET',
       headers: {
@@ -15,9 +15,7 @@ function Assignements() {
       },
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         return res.json();
       })
       .then((data) => {
@@ -31,21 +29,42 @@ function Assignements() {
       });
   }, []);
 
-  if (loading) return <div className="loader">Loading assignments...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  const formatTimestamp = (isoString) => {
+    const [datePart, timePartWithZ] = isoString.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+  
+    const timePart = timePartWithZ.replace('Z', '');
+    const [hour, minute, second] = timePart.split(':').map((val) => parseInt(val, 10));
+  
+    // Create the date as if it's already in Argentina time (ignore UTC interpretation)
+    const localDate = new Date(year, month - 1, day, hour, minute, second);
+  
+    return localDate.toLocaleString('en-US', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
+  };
+  
+
+  if (loading) return <p className="loader">Loading assignments...</p>;
+  if (error) return <p className="error">Error: {error}</p>;
 
   return (
-    <div className="App">
-      <h1>Today's Parking Assignments</h1>
-      <table>
+    <div className="assignments-container">
+      <h1 className='h1-assignments'>Today's Parking Assignments</h1>
+      <table className="assignments-table">
         <thead>
           <tr>
             <th>Slot</th>
             <th>Name</th>
-            <th>Phone</th>
             <th>Priority</th>
             <th>Reservation Time</th>
-            <th>Slot</th>
             <th>New Hire</th>
             <th>Early?</th>
           </tr>
@@ -55,10 +74,8 @@ function Assignements() {
             <tr key={entry.reservation_id}>
               <td>{entry.slot || 'WL'}</td>
               <td>{entry.name}</td>
-              <td>{entry.phone}</td>
               <td>{entry.priority}</td>
-              <td>{entry.reservation_timestamp}</td>
-              <td>{entry.slot}</td>
+              <td>{formatTimestamp(entry.reservation_timestamp)}</td>
               <td>{entry.is_new ? '✅' : '❌'}</td>
               <td>{entry.is_early ? '✅' : '❌'}</td>
             </tr>
@@ -69,4 +86,4 @@ function Assignements() {
   );
 }
 
-export default Assignements;
+export default Assignments;
