@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css'; // Import your CSS for styling
 import ParkingComparison from './ParkingComparison';
+import LastCancellations from './LastCancellations'
 
 function Home() {
 
@@ -8,7 +9,7 @@ function Home() {
   return (
     <div className="Home">
         <ParkingComparison/>
-        <ParkingComparison/>
+        <LastCancellations/>
     </div>
   );
 }

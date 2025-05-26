@@ -1,0 +1,72 @@
+.last-cancellations {
+  max-width: 600px;
+  width: 70vw;
+  margin: 2rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status-metric {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.cancellations-list {
+  margin-top: 1rem;
+}
+
+.cancellations-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.cancellation-item {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.cancellation-info{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cancellation-user {
+  font-weight: 600;
+  margin: 1rem;
+}
+
+.cancellation-time {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.cancellation-status {
+  font-weight: bold;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.bad-cancellation .cancellation-status {
+  background-color: #f44336;
+  color: white;
+}
+
+.good-cancellation .cancellation-status {
+  background-color: #4caf50;
+  color: white;
+}
+
+.bad-cancellation {
+  border-left: 4px solid #f44336;
+}
+
+.good-cancellation {
+  border-left: 4px solid #4caf50;
+}
