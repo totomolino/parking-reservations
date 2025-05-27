@@ -113,15 +113,16 @@ export default function ParkingComparison() {
       <article className="waiting-list">
         <h3>Waiting List</h3>
         {current.waitingList.length ? (
-          <ul>
+          <ol>
             {current.waitingList.map((person, idx) => (
               <li key={idx}>{person.name}</li>
             ))}
-          </ul>
+          </ol>
         ) : (
           <p className="no-waiters">No one on the waiting list.</p>
         )}
       </article>
+
     </section>
   );
 }
