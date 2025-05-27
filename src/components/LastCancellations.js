@@ -28,22 +28,31 @@ export default function LastCancellations() {
       <header className="status-metric">
         <h2>Last Cancellations</h2>
       </header>
-
-      <article className="cancellations-list">
-        <ul>
-          {data.map((cancellation, idx) => (
-            <li key={idx} className={`cancellation-item ${cancellation.is_bad ? 'bad-cancellation' : ''}`}>
-              <div className="cancellation-info">
-                <span className="cancellation-user">{cancellation.name}</span>
-                <span className="cancellation-time">{formatTimestamp(cancellation.cancellation_time)}</span>
-                <span className={`cancellation-status ${cancellation.is_bad ? 'bad' : 'good'}`}>
-                  {cancellation.is_bad ? 'Bad Cancellation' : 'Good Cancellation'}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </article>
+    <article className="cancellations-list">
+      <div className="cancellation-header">
+        <span className="col-user">User</span>
+        <span className="col-time">Time</span>
+        <span className="col-score tooltip-container">
+          Score 🛈
+          <span className="tooltip-text">This is the user's new score after cancellation</span>
+        </span>
+        <span className="col-status">Status</span>
+      </div>
+      <ul>
+        {data.map((cancellation, idx) => (
+          <li key={idx} className={`cancellation-item ${cancellation.is_bad ? 'bad-cancellation' : 'good-cancellation'}`}>
+            <div className="cancellation-info">
+              <span className="col-user">{cancellation.name}</span>
+              <span className="col-time">{formatTimestamp(cancellation.cancellation_time)}</span>
+              <span className="col-score">{cancellation.possible_new_score}</span>
+              <span className={`col-status cancellation-status ${cancellation.is_bad ? 'bad' : 'good'}`}>
+                {cancellation.is_bad ? 'Bad' : 'Good'}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </article>
     </section>
   );
 }
