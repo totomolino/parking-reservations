@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './TopCancellers.css';
-import { formatTimestamp } from '../utils/dates';
 
 export default function TopCancellers() {
   const [data, setData] = useState([]);

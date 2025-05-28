@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
-import ParkingComparison from './components/ParkingComparison';
 import Assignements from './components/Assignements';
 import Location from './components/Location';
 import Home from './components/Home';
+import TopCancellers from './components/TopCancellers';
 
 function App() {
   return (
@@ -17,6 +17,7 @@ function App() {
             <ul className="nav-links">
               <li><Link to="/">Home</Link></li>
               <li><Link to="/assignements">Assignments</Link></li>
+              <li><Link to="/top_cancellers">Top Cancellers</Link></li>
             </ul>
           </nav>
         </header>
@@ -26,6 +27,7 @@ function App() {
             <Route path="/" element={<Home/>} />
             <Route path="/assignements" element={<Assignements />} />
             <Route path="/location" element={<Location />} />
+            <Route path="/top_cancellers" element={<TopCancellers />} />
           </Routes>
         </main>
 

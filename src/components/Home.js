@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import './Home.css'; // Import your CSS for styling
 import ParkingComparison from './ParkingComparison';
 import LastCancellations from './LastCancellations'
-import TopCancellers from './TopCancellers';
+import MonthlyCancellations from './MonthlyCancellations';
 
 function Home() {
 
@@ -11,7 +10,7 @@ function Home() {
     <div className="Home">
         <ParkingComparison/>
         <LastCancellations/>
-        <TopCancellers/>
+        <MonthlyCancellations/>
     </div>
   );
 }
