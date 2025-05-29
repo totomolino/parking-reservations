@@ -1,6 +1,5 @@
 .Home{
     display: flex;
-    justify-content: space-evenly;
     flex-wrap: nowrap;
-    flex-direction: row;
+    max-width: 100%;
 }

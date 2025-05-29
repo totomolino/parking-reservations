@@ -1,12 +1,14 @@
+.last-cancellations-container {
+  padding: 2rem;
+  width: calc(100%/3);
+  height: max-content;
+}
+
 .last-cancellations {
-  max-width: 600px;
-  width: 70vw;
-  margin: 2rem;
   padding: 1rem;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  height: max-content;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .status-metric {
@@ -30,11 +32,11 @@
   align-items: center;
 }
 
-.cancellation-info{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+.cancellation-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .cancellation-user {
@@ -121,10 +123,11 @@
 
   position: absolute;
   z-index: 10;
-  bottom: 125%; /* above the text */
+  bottom: 125%;
+  /* above the text */
   left: 50%;
   transform: translateX(-50%);
-  
+
   opacity: 0;
   transition: opacity 0.2s;
 }
