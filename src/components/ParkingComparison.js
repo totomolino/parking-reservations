@@ -86,7 +86,7 @@ export default function ParkingComparison() {
                   <span className="slot-assigned">{slot.assignedTo}</span>
                 </div>
 
-                {selected === 'today' && (
+                {selected === 'today' && slot.status !== 'available' && (
                   <a
                     href={buildWhatsAppLink(
                       slot.phone,
