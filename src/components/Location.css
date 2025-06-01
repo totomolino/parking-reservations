@@ -1,12 +1,12 @@
 /* Location.css */
 
-h1 {
+.h1 {
   font-size: 24px;
   color: #333;
   margin-bottom: 20px;
 }
 
-button {
+.button {
   background-color: #007bff; /* Button color */
   color: white;
   padding: 12px 24px;
@@ -18,7 +18,7 @@ button {
   transition: background-color 0.3s;
 }
 
-button:hover {
+.button:hover {
   background-color: #0056b3; /* Darker blue on hover */
 }
 
@@ -27,7 +27,7 @@ button:hover {
   margin-top: 10px;
 }
 
-p {
+.p {
   font-size: 16px;
   margin-top: 20px;
   color: #555;

@@ -3,7 +3,12 @@ import './MonthlyCancellations.css';
 
 export default function MonthlyCancellations() {
   const [data, setData] = useState([]);
-  const [headerMonth, setHeaderMonth] = useState([]);
+  const [dataLastMonth, setDataLastMonth] = useState([]);
+  const [headerMonth, setHeaderMonth] = useState('');
+  const [headerLastMonth, setHeaderLastMonth] = useState('');
+  const [headerLastYear, setHeaderLastYear] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [activeMonth, setActiveMonth] = useState('current');
 
   // Fetch monthly data
   useEffect(() => {
@@ -20,63 +25,107 @@ export default function MonthlyCancellations() {
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
-        // Get the globalized month name in English, then capitalize the first letter
+        // Compute last month and its year
+        const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
+        const lastMonth = lastMonthDate.getMonth();
+        const lastYear = lastMonthDate.getFullYear();
+
+        // Format month names
         const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(now);
         const capitalizedMonthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+        setHeaderMonth(capitalizedMonthName);
 
-        // Set the month name in the header or in the state to display
-        setHeaderMonth(capitalizedMonthName);  // Assuming you have a state for the header like setHeaderMonth
+        const lastMonthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(lastMonthDate);
+        const capitalizedLastMonthName = lastMonthName.charAt(0).toUpperCase() + lastMonthName.slice(1);
+        setHeaderLastMonth(capitalizedLastMonthName);
+        setHeaderLastYear(lastYear);
 
-
-
-        const filtered = rawData.filter(item => {
+        // Filter current month data
+        const filteredCurrent = rawData.filter(item => {
           const date = new Date(item.cancellation_month);
-
-          // Convert the date to UTC and extract the month and year in UTC
-          const parsedMonth = date.getUTCMonth();  // getUTCMonth gives the month in UTC
-          const parsedYear = date.getUTCFullYear();  // getUTCFullYear gives the year in UTC
-
-          return parsedMonth === currentMonth && parsedYear === currentYear;
+          return date.getUTCMonth() === currentMonth && date.getUTCFullYear() === currentYear;
         });
-        setData(filtered);
+        setData(filteredCurrent);
+
+        // Filter last month data
+        const filteredLast = rawData.filter(item => {
+          const date = new Date(item.cancellation_month);
+          return date.getUTCMonth() === lastMonth && date.getUTCFullYear() === lastYear;
+        });
+        setDataLastMonth(filteredLast);
+
+        setLoading(false);
       })
-      .catch(console.error);
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
 
-  if (!data.length) {
-    return <p>Loading last monthly…</p>;
+  if (loading) {
+    return <p>Loading cancellations…</p>;
   }
+
+  const displayData = activeMonth === 'current' ? data : dataLastMonth;
+  const displayHeader = activeMonth === 'current' ? headerMonth : headerLastMonth;
+  const displayYear = activeMonth === 'current' ? new Date().getFullYear() : headerLastYear;
 
   return (
     <section className="monthly-cancellations-container">
       <div className="monthly-cancellations">
         <header className="status-metric">
-          <h2>Monthly Cancellations for {headerMonth} {new Date().getFullYear()}</h2>
+          <h2>Monthly Cancellations for {displayHeader} {displayYear}</h2>
         </header>
-        <article className="monthly-list">
-          <div className="monthly-header">
-            <span className="monthly-cancellation-col-user">User</span>
-            <span className="monthly-cancellation-col-score tooltip-container">
-              Cancellations 🛈
-              <span className="tooltip-text">This is the user's new score after canceller</span>
-            </span>
-            <span className="monthly-cancellation-col-score tooltip-container">
-              Possible Score 🛈
-              <span className="tooltip-text">This is the user's new score after canceller</span>
-            </span>
-          </div>
-          <ul>
-            {data.slice(0, 30).map((canceller, idx) => (
-              <li key={idx} className={`monthly-item`}>
-                <div className="monthly-info">
-                  <span className="col-user">{canceller.name}</span>
-                  <span className="col-score">{canceller.cancellation_count}</span>
-                  <span className="col-score">{canceller.possible_new_score}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </article>
+
+        <div className="buttons">
+          <button
+            className={activeMonth === 'last' ? 'active' : ''}
+            onClick={() => setActiveMonth('last')}
+          >
+            Last Month
+          </button>
+          <button
+            className={activeMonth === 'current' ? 'active' : ''}
+            onClick={() => setActiveMonth('current')}
+          >
+            Current Month
+          </button>
+        </div>
+
+        {displayData.length === 0 ? (
+          <p>No cancellations yet</p>
+        ) : (
+          <article className="monthly-list">
+            <div className="monthly-header">
+              <span className="monthly-cancellation-col-user">User</span>
+              <span className="monthly-cancellation-col-score tooltip-container">
+                Cancellations 🛈
+                <span className="tooltip-text">This is the user's new score after canceller</span>
+              </span>
+              <span className="monthly-cancellation-col-score tooltip-container">
+                Possible Score 🛈
+                <span className="tooltip-text">This is the user's new score after canceller</span>
+              </span>
+            </div>
+            <ul>
+              {displayData.slice(0, 30).map((canceller, idx) => {
+                const isHigh = parseInt(canceller.cancellation_count, 10) > 2;
+                return (
+                  <li
+                    key={idx}
+                    className={`monthly-item ${isHigh ? 'high-cancellation' : ''}`}
+                  >
+                    <div className="monthly-info">
+                      <span className="monthly-user">{canceller.name}</span>
+                      <span className="monthly-cancellations-count">{canceller.cancellation_count}</span>
+                      <span className="monthly-score">{canceller.possible_new_score}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </article>
+        )}
       </div>
     </section>
   );

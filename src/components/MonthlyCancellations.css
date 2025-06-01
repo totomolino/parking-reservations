@@ -1,3 +1,30 @@
+.buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #c3c1c1;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.buttons button:hover {
+  background: #f3c796;
+}
+
+.buttons button.active {
+  background: #e27c07;
+  color: #fff;
+  border-color: #000;
+  border-width: 3px;
+}
+
 .monthly-cancellations-container {
   padding: 2rem;
   width: calc(100%/3);
@@ -13,36 +40,46 @@
 }
 
 .monthly-list {
-  margin-top: 1rem;
-}
-
-.monthly-list ul {
   list-style: none;
   padding: 0;
 }
 
 .monthly-item {
-  padding: 0.8rem 0;
-  border-bottom: 1px solid #eee;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #eee;
+  min-height: 3rem;
+}
+
+.monthly-item.high-cancellation {
+  background-color: #ffe5e5; /* light red background */
+}
+
+.monthly-item.high-cancellation .col-user,
+.monthly-item.high-cancellation .col-score {
+  color: red;
 }
 
 .monthly-info {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
 }
 
 .monthly-user {
   font-weight: 600;
-  margin: 1rem;
 }
 
-.monthly-time {
-  font-size: 0.9rem;
-  color: #666;
+/* .monthly-score {
+  text-align: center;
 }
+
+.monthly-cancellations-count {
+  width: 15%;
+  text-align: center;
+} */
 
 .monthly-status {
   font-weight: bold;
