@@ -39,47 +39,42 @@
   box-sizing: border-box;
 }
 
+.monthly{
+  margin-bottom: 2rem;
+}
+
 .monthly-list {
   list-style: none;
   padding: 0;
+  margin-block-start: 0em;
 }
 
 .monthly-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 0;
+  padding: 0.8rem 0;
   border-bottom: 1px solid #eee;
-  min-height: 3rem;
+  align-items: center;
 }
 
 .monthly-item.high-cancellation {
   background-color: #ffe5e5; /* light red background */
 }
 
-.monthly-item.high-cancellation .col-user,
-.monthly-item.high-cancellation .col-score {
+.monthly-item.high-cancellation .monthly-cancellation-col-user,
+.monthly-item.high-cancellation .monthly-cancellation-col-score,
+.monthly-item.high-cancellation .monthly-cancellation-col-cancellations {
   color: red;
 }
 
 .monthly-info {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
 }
 
 .monthly-user {
   font-weight: 600;
 }
-
-/* .monthly-score {
-  text-align: center;
-}
-
-.monthly-cancellations-count {
-  width: 15%;
-  text-align: center;
-} */
 
 .monthly-status {
   font-weight: bold;
@@ -129,12 +124,12 @@
   font-size: 0.9rem;
 }
 
-.monthly-cancellation-col-score {
+.monthly-cancellation-col-cancellations {
   width: 30%;
-  text-align: start;
+  text-align: center;
 }
 
-.monthly-cancellation-col-status {
+.monthly-cancellation-col-score {
   width: 30%;
   text-align: center;
 }

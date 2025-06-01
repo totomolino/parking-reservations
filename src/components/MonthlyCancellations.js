@@ -95,10 +95,10 @@ export default function MonthlyCancellations() {
         {displayData.length === 0 ? (
           <p>No cancellations yet</p>
         ) : (
-          <article className="monthly-list">
+          <article className="monthly">
             <div className="monthly-header">
               <span className="monthly-cancellation-col-user">User</span>
-              <span className="monthly-cancellation-col-score tooltip-container">
+              <span className="monthly-cancellation-col-cancellations tooltip-container">
                 Cancellations 🛈
                 <span className="tooltip-text">This is the user's new score after canceller</span>
               </span>
@@ -107,7 +107,7 @@ export default function MonthlyCancellations() {
                 <span className="tooltip-text">This is the user's new score after canceller</span>
               </span>
             </div>
-            <ul>
+            <ul className="monthly-list">
               {displayData.slice(0, 30).map((canceller, idx) => {
                 const isHigh = parseInt(canceller.cancellation_count, 10) > 2;
                 return (
@@ -116,9 +116,9 @@ export default function MonthlyCancellations() {
                     className={`monthly-item ${isHigh ? 'high-cancellation' : ''}`}
                   >
                     <div className="monthly-info">
-                      <span className="monthly-user">{canceller.name}</span>
-                      <span className="monthly-cancellations-count">{canceller.cancellation_count}</span>
-                      <span className="monthly-score">{canceller.possible_new_score}</span>
+                      <span className="monthly-cancellation-col-user">{canceller.name}</span>
+                      <span className="monthly-cancellation-col-cancellations">{canceller.cancellation_count}</span>
+                      <span className="monthly-cancellation-col-score">{canceller.possible_new_score}</span>
                     </div>
                   </li>
                 );
