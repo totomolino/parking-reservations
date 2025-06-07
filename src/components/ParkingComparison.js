@@ -47,15 +47,6 @@ export default function ParkingComparison() {
 
   // Fetch Twilio balance using credentials from environment variables
   useEffect(() => {
-    console.log(process.env)
-    const accountSid = process.env.REACT_APP_TWILIO_ACCOUNT_SID;
-    const authToken = process.env.REACT_APP_TWILIO_AUTH_TOKEN;
-
-    if (!accountSid || !authToken) {
-      console.error('Twilio credentials are missing in environment variables.');
-      setHealth('NO CREDS');
-      return;
-    }
 
     const url = `https://brief-stable-penguin.ngrok-free.app/twilio-balance`;
     const headers = {
