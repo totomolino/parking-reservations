@@ -73,7 +73,7 @@ export default function MonthlyCancellations() {
   return (
     <section className="monthly-cancellations-container">
       <div className="monthly-cancellations">
-        <header className="status-metric">
+        <header className="title">
           <h2 className="card-title">Monthly Cancellations for {displayHeader} {displayYear}</h2>
         </header>
 

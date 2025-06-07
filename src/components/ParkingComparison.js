@@ -57,9 +57,8 @@ export default function ParkingComparison() {
       return;
     }
 
-    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Balance.json`;
+    const url = `https://brief-stable-penguin.ngrok-free.app/twilio-balance`;
     const headers = {
-      'Authorization': 'Basic ' + btoa(`${accountSid}:${authToken}`),
       'Content-Type': 'application/json',
       'ngrok-skip-browser-warning': 'true',
     };
@@ -69,7 +68,7 @@ export default function ParkingComparison() {
         if (!res.ok) throw new Error('Failed to fetch Twilio balance');
         return res.json();
       })
-      .then(json => setBalance(`$${json.balance} ${json.currency}`))
+      .then(json => setBalance(`$${json.balance}`))
       .catch(err => {
         console.error('Twilio balance check failed:', err);
         setBalance('FAIL');
@@ -88,8 +87,10 @@ export default function ParkingComparison() {
     <section className="parking-comparison-container">
       <div className="parking-comparison">
         <header className="status-metric">
-          <strong>System Status: </strong>
-          <span className={`health-indicator ${healthClass}`}>{health || '...'}</span>
+          <div >
+            <strong>System Status: </strong>
+            <span className={`health-indicator ${healthClass}`}>{health || '...'}</span>
+          </div>
           <span className="twilio-balance" style={{ marginLeft: '1em' }}>
             <strong>Twilio Balance:</strong> {balance || '...'}
           </span>

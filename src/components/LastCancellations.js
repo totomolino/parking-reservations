@@ -34,7 +34,7 @@ export default function LastCancellations() {
   return (
     <section className="last-cancellations-container">
       <div className="last-cancellations">
-        <header className="status-metric">
+        <header className="title">
           <h2 className="card-title">Last Cancellations</h2>
         </header>
         <article className="cancellations-list">

@@ -24,7 +24,7 @@ export default function TopCancellers() {
 
   return (
     <section className="top-cancellers">
-      <header className="status-metric">
+      <header className="title">
         <h2>Top cancellers (Last 3 months)</h2>
       </header>
     <article className="cancellers-list">
