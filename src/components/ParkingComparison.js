@@ -3,7 +3,7 @@ import './ParkingComparison.css';
 
 export default function ParkingComparison() {
   const [data, setData] = useState({ today: null, yesterday: null });
-  const [selected, setSelected] = useState('yesterday');
+  const [selected, setSelected] = useState('today');
   const [health, setHealth] = useState(null);
 
   // Helper to build WhatsApp link
