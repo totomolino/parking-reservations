@@ -10,12 +10,20 @@ export default function LastCancellations() {
     fetch('https://brief-stable-penguin.ngrok-free.app/last_cancellations', {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
       },
     })
       .then(res => res.json())
-      .then(setData)
+      .then(fetchedData => {
+      const now = Date.now();
+      const fourteenDaysMs = 15 * 24 * 60 * 60 * 1000;
+      const filtered = fetchedData.filter(item => {
+        const cancellationTime = new Date(item.cancellation_time).getTime();
+        return now - cancellationTime <= fourteenDaysMs;
+      });
+      setData(filtered);
+      })
       .catch(console.error);
   }, []);
 
@@ -27,7 +35,7 @@ export default function LastCancellations() {
     <section className="last-cancellations-container">
       <div className="last-cancellations">
         <header className="status-metric">
-          <h2>Last Cancellations</h2>
+          <h2 className="card-title">Last Cancellations</h2>
         </header>
         <article className="cancellations-list">
           <div className="cancellation-header">

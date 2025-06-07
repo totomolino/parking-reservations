@@ -5,6 +5,7 @@ export default function ParkingComparison() {
   const [data, setData] = useState({ today: null, yesterday: null });
   const [selected, setSelected] = useState('today');
   const [health, setHealth] = useState(null);
+  const [balance, setBalance] = useState(null);
 
   // Helper to build WhatsApp link
   const buildWhatsAppLink = (phone, message) => {
@@ -44,6 +45,37 @@ export default function ParkingComparison() {
       });
   }, []);
 
+  // Fetch Twilio balance using credentials from environment variables
+  useEffect(() => {
+    console.log(process.env)
+    const accountSid = process.env.REACT_APP_TWILIO_ACCOUNT_SID;
+    const authToken = process.env.REACT_APP_TWILIO_AUTH_TOKEN;
+
+    if (!accountSid || !authToken) {
+      console.error('Twilio credentials are missing in environment variables.');
+      setHealth('NO CREDS');
+      return;
+    }
+
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Balance.json`;
+    const headers = {
+      'Authorization': 'Basic ' + btoa(`${accountSid}:${authToken}`),
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+    };
+
+    fetch(url, { method: 'GET', headers })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch Twilio balance');
+        return res.json();
+      })
+      .then(json => setBalance(`$${json.balance} ${json.currency}`))
+      .catch(err => {
+        console.error('Twilio balance check failed:', err);
+        setBalance('FAIL');
+      });
+  }, []);
+
   if (!data.today || !data.yesterday) {
     return <p>Loading parking assignments…</p>;
   }
@@ -56,8 +88,11 @@ export default function ParkingComparison() {
     <section className="parking-comparison-container">
       <div className="parking-comparison">
         <header className="status-metric">
-          <strong>System Status:</strong>
+          <strong>System Status: </strong>
           <span className={`health-indicator ${healthClass}`}>{health || '...'}</span>
+          <span className="twilio-balance" style={{ marginLeft: '1em' }}>
+            <strong>Twilio Balance:</strong> {balance || '...'}
+          </span>
         </header>
 
         <div className="buttons">

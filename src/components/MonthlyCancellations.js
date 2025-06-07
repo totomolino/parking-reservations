@@ -74,7 +74,7 @@ export default function MonthlyCancellations() {
     <section className="monthly-cancellations-container">
       <div className="monthly-cancellations">
         <header className="status-metric">
-          <h2>Monthly Cancellations for {displayHeader} {displayYear}</h2>
+          <h2 className="card-title">Monthly Cancellations for {displayHeader} {displayYear}</h2>
         </header>
 
         <div className="buttons">

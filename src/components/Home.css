@@ -3,3 +3,7 @@
     flex-wrap: nowrap;
     max-width: 100%;
 }
+
+.card-title{
+    margin-top: 0%;
+}
