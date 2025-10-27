@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import './Roster.css';
 
 const UPDATE_ENDPOINT =
-  'https://prod-126.westus.logic.azure.com:443/workflows/b2d6f475b0de4c0d80a142dcf337d9e6/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hoJZZgkvY_aMGyVGNUDOMSl5LfIE-imsBBxTw3P8JU4';
+  'https://defaultec3c7deed552494ba3937f941a90b9.85.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b2d6f475b0de4c0d80a142dcf337d9e6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=63426SeWJBhxzuJY_DVD8ooi5IJKxurp8iDiwTlykHs';
 const ROSTER_ENDPOINT = 'https://brief-stable-penguin.ngrok-free.app/roster';
 
 function Roster() {
