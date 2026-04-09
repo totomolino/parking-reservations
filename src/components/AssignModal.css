@@ -1,0 +1,180 @@
+/* ── Backdrop ─────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* ── Box ─────────────────────────────────────────────── */
+.modal-box {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.modal-warning {
+  font-size: 0.82rem;
+  color: var(--warning);
+  background: var(--warning-light);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+}
+
+/* ── Search ──────────────────────────────────────────── */
+.modal-search {
+  position: relative;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.modal-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(226,124,7,0.15);
+}
+
+/* ── Suggestions dropdown ────────────────────────────── */
+.modal-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  padding: 0.25rem 0;
+  margin: 0;
+  z-index: 10;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.modal-suggestion-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.modal-suggestion-item:hover,
+.modal-suggestion-item.selected { background: var(--primary-light); }
+
+.sug-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.sug-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Notify checkbox ─────────────────────────────────── */
+.modal-notify-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* ── Actions ─────────────────────────────────────────── */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.modal-btn-cancel {
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.modal-btn-cancel:hover { background: var(--bg); }
+
+.modal-btn-confirm {
+  padding: 0.45rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+.modal-btn-confirm:hover    { background: var(--primary-dark); }
+.modal-btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Swap-specific ───────────────────────────────────── */
+.swap-selects {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.swap-select-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.swap-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+
+.swap-arrow {
+  font-size: 1.4rem;
+  color: var(--text-muted);
+  padding-bottom: 0.35rem;
+  flex-shrink: 0;
+}
