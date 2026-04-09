@@ -1,13 +1,95 @@
+:root {
+  --primary:        #e27c07;
+  --primary-dark:   #c56d00;
+  --primary-light:  #fff3e0;
+  --nav-bg:         #16213e;
+  --bg:             #f0f2f5;
+  --card:           #ffffff;
+  --text:           #1e293b;
+  --text-muted:     #64748b;
+  --border:         #e2e8f0;
+  --success:        #16a34a;
+  --success-light:  #dcfce7;
+  --danger:         #dc2626;
+  --danger-light:   #fee2e2;
+  --warning:        #d97706;
+  --warning-light:  #fef3c7;
+  --shadow-sm:      0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md:      0 4px 16px rgba(0,0,0,0.08);
+  --radius:         10px;
+  --radius-sm:      6px;
+  --font:           'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Shared card */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem 1.5rem;
+}
+
+/* Shared badge */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-danger  { background: var(--danger-light);  color: var(--danger); }
+.badge-warning { background: var(--warning-light); color: var(--warning); }
+.badge-muted   { background: var(--border);        color: var(--text-muted); }
+
+/* Shared loader / error */
+.loader, .error {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+.error { color: var(--danger); }
+
+/* Tooltip */
+.tooltip-container {
+  position: relative;
+  cursor: help;
+}
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  background: #1e293b;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 400;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }

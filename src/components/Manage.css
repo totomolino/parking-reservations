@@ -1,0 +1,244 @@
+.manage-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* ── Toolbar ─────────────────────────────────────────── */
+.manage-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 0.85rem 1.25rem;
+}
+
+.manage-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.manage-date {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+}
+
+.manage-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.notify-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-secondary:hover { background: var(--bg); }
+
+.btn-refresh {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-refresh:hover { background: var(--primary-dark); }
+
+/* ── Group section ───────────────────────────────────── */
+.manage-group {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem 1.5rem;
+}
+
+.manage-group-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* ── Slot grid ───────────────────────────────────────── */
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+/* ── Slot card ───────────────────────────────────────── */
+.slot-card {
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: box-shadow 0.15s;
+}
+.slot-card:hover { box-shadow: var(--shadow-md); }
+
+.slot-card--assigned { border-color: #86efac; background: #f0fdf4; }
+.slot-card--pending  { border-color: #fcd34d; background: #fffbeb; }
+.slot-card--available{ border-color: var(--border); background: var(--card); }
+
+.slot-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slot-card-number {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.slot-card-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+.badge-assigned  { background: var(--success-light); color: var(--success); }
+.badge-pending   { background: var(--warning-light); color: var(--warning); }
+.badge-available { background: var(--border);        color: var(--text-muted); }
+
+.slot-card-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 1.2em;
+}
+
+.slot-card-empty { color: var(--text-muted); font-weight: 400; }
+
+.slot-card-timeout {
+  font-size: 0.7rem;
+  color: var(--warning);
+}
+
+.slot-card-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+/* ── Slot action buttons ─────────────────────────────── */
+.slot-btn {
+  flex: 1;
+  padding: 0.28rem 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+.slot-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.slot-btn--assign  { background: var(--primary);       color: #fff; }
+.slot-btn--assign:hover  { background: var(--primary-dark); }
+.slot-btn--release { background: var(--danger-light);  color: var(--danger); }
+.slot-btn--release:hover { background: #fecaca; }
+
+/* ── Waiting List ────────────────────────────────────── */
+.manage-wl {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem 1.5rem;
+}
+
+.wl-count {
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.wl-empty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.wl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.wl-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.wl-item:last-child { border-bottom: none; }
+
+.wl-pos {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.wl-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.wl-phone {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

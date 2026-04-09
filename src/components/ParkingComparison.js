@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ParkingComparison.css';
+import api from '../api';
+import Loader from './Loader';
 
 export default function ParkingComparison() {
   const [data, setData] = useState({ today: null, yesterday: null });
@@ -7,67 +9,42 @@ export default function ParkingComparison() {
   const [health, setHealth] = useState(null);
   const [balance, setBalance] = useState(null);
 
-  // Helper to build WhatsApp link
   const buildWhatsAppLink = (phone, message) => {
     const clean = phone.replace(/\D/g, '');
     const text = encodeURIComponent(message);
     return `https://wa.me/${clean}?text=${text}`;
   };
 
-  // Fetch parking data
   useEffect(() => {
-    fetch('https://brief-stable-penguin.ngrok-free.app/parking-data', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
-    })
-      .then(res => res.json())
-      .then(setData)
-      .catch(console.error);
-  }, []);
+    Promise.allSettled([
+      api.get('/parking-data'),
+      api.get('/health'),
+      api.get('/twilio-balance'),
+    ]).then(([parkingResult, healthResult, balanceResult]) => {
+      if (parkingResult.status === 'fulfilled') {
+        setData(parkingResult.value.data);
+      } else {
+        console.error('Parking data fetch failed:', parkingResult.reason);
+      }
 
-  // Fetch health status as text
-  useEffect(() => {
-    fetch('https://brief-stable-penguin.ngrok-free.app/health', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
-    })
-      .then(res => res.text())
-      .then(text => setHealth(text.trim()))
-      .catch(err => {
-        console.error('Health check failed:', err);
+      if (healthResult.status === 'fulfilled') {
+        setHealth(String(healthResult.value.data).trim());
+      } else {
+        console.error('Health check failed:', healthResult.reason);
         setHealth('FAIL');
-      });
-  }, []);
+      }
 
-  // Fetch Twilio balance using credentials from environment variables
-  useEffect(() => {
-
-    const url = `https://brief-stable-penguin.ngrok-free.app/twilio-balance`;
-    const headers = {
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': 'true',
-    };
-
-    fetch(url, { method: 'GET', headers })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch Twilio balance');
-        return res.json();
-      })
-      .then(json => setBalance(`$${json.balance}`))
-      .catch(err => {
-        console.error('Twilio balance check failed:', err);
+      if (balanceResult.status === 'fulfilled') {
+        setBalance(`$${balanceResult.value.data.balance}`);
+      } else {
+        console.error('Twilio balance check failed:', balanceResult.reason);
         setBalance('FAIL');
-      });
+      }
+    });
   }, []);
 
   if (!data.today || !data.yesterday) {
-    return <p>Loading parking assignments…</p>;
+    return <Loader text="Loading parking data…" />;
   }
 
   const { today, yesterday } = data;
@@ -75,10 +52,9 @@ export default function ParkingComparison() {
   const healthClass = health === 'OK' ? 'healthy' : 'unhealthy';
 
   return (
-    <section className="parking-comparison-container">
-      <div className="parking-comparison">
+    <section className="parking-comparison">
         <header className="status-metric">
-          <div >
+          <div>
             <strong>System Status: </strong>
             <span className={`health-indicator ${healthClass}`}>{health || '...'}</span>
           </div>
@@ -151,7 +127,6 @@ export default function ParkingComparison() {
           )}
         </article>
 
-      </div>
     </section>
   );
 }
