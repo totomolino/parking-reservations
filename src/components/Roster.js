@@ -1,14 +1,16 @@
 // src/components/Roster.js
 import React, { useEffect, useState, useMemo } from 'react';
 import './Roster.css';
+import api from '../api';
+import Loader from './Loader';
 
 const UPDATE_ENDPOINT =
   'https://defaultec3c7deed552494ba3937f941a90b9.85.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b2d6f475b0de4c0d80a142dcf337d9e6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=63426SeWJBhxzuJY_DVD8ooi5IJKxurp8iDiwTlykHs';
-const ROSTER_ENDPOINT = 'https://brief-stable-penguin.ngrok-free.app/roster';
 
 function Roster() {
   const [roster, setRoster] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(null);
 
   // filters & sort state
@@ -30,19 +32,9 @@ function Roster() {
     setLoading(true);
     setError(null);
 
-    fetch(ROSTER_ENDPOINT, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
-    })
+    api.get('/roster')
       .then(res => {
-        if (!res.ok) throw new Error(res.statusText);
-        return res.json();
-      })
-      .then(data => {
-        setRoster(data);
+        setRoster(res.data);
         setLoading(false);
       })
       .catch(err => {
@@ -59,6 +51,7 @@ function Roster() {
 
   // trigger your Power Automate flow, then re-fetch
   const updateRoster = () => {
+    setUpdating(true);
     fetch(UPDATE_ENDPOINT, { method: 'POST' })
       .then(res => {
         if (!res.ok) throw new Error(res.statusText);
@@ -67,7 +60,8 @@ function Roster() {
       .then(() => {
         fetchRoster();
       })
-      .catch(err => console.error('Update Roster failed:', err));
+      .catch(err => console.error('Update Roster failed:', err))
+      .finally(() => setUpdating(false));
   };
 
   // just re-fetch
@@ -146,7 +140,7 @@ function Roster() {
     return data;
   }, [roster, filters, sortConfig]);
 
-  if (loading) return <p className="loader">Loading Roster…</p>;
+  if (loading) return <Loader text="Loading roster…" />;
   if (error) return <p className="error">Error: {error}</p>;
 
   return (
@@ -157,8 +151,8 @@ function Roster() {
           <button className="refresh-btn" onClick={refreshData}>
             Refresh
           </button>
-          <button className="update-roster-btn" onClick={updateRoster}>
-            Update Roster
+          <button className="update-roster-btn" onClick={updateRoster} disabled={updating}>
+            {updating ? 'Updating…' : 'Update Roster'}
           </button>
         </div>
       </div>

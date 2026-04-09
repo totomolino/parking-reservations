@@ -1,79 +1,95 @@
-html,
-body,
-#root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f7fa;
-}
-
 .App {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
+  min-height: 100vh;
 }
 
+/* ── Header ─────────────────────────────────────────── */
 .App-header {
-  background-color: #e27c07;
-  padding: 1rem 2rem;
-  color: #fff;
+  background: var(--nav-bg);
+  padding: 0 2rem;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #fff;
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
 }
 
 .logo-image {
-  width: 80px;
-  height: 80px;
+  width: 34px;
+  height: 34px;
   object-fit: contain;
-  margin-left: 1rem;
+  border-radius: 6px;
 }
 
+.logo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+  margin: 0;
+}
+
+/* ── Nav ─────────────────────────────────────────────── */
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 1rem;
+  gap: 0.25rem;
   margin: 0;
   padding: 0;
 }
 
 .nav-links a {
-  color: #fff;
+  display: block;
+  color: rgba(255,255,255,0.72);
   text-decoration: none;
+  font-size: 0.875rem;
   font-weight: 500;
-  transition: opacity 0.3s ease;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
 }
 
 .nav-links a:hover {
-  opacity: 0.8;
+  background: rgba(255,255,255,0.09);
+  color: #fff;
 }
 
+.nav-links a.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ── Main content ────────────────────────────────────── */
 .App-content {
   flex: 1;
+  padding: 1.75rem 2rem;
 }
 
-.welcome h2 {
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.welcome p {
-  color: #555;
-  font-size: 1rem;
-}
-
+/* ── Footer ──────────────────────────────────────────── */
 .App-footer {
-  background-color: #fff;
+  background: var(--card);
+  border-top: 1px solid var(--border);
   text-align: center;
-  padding: 1rem 0;
-  border-top: 1px solid #e0e0e0;
+  padding: 0.85rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── Page heading shared ─────────────────────────────── */
+.page-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 1.5rem;
 }

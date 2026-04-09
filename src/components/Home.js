@@ -4,8 +4,6 @@ import LastCancellations from './LastCancellations'
 import MonthlyCancellations from './MonthlyCancellations';
 
 function Home() {
-
-  // The map ref is no longer required in React-Leaflet
   return (
     <div className="Home">
         <ParkingComparison/>

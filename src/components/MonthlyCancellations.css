@@ -1,166 +1,100 @@
+.monthly-cancellations {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem 1.5rem;
+}
+
+/* ── Toggle buttons ──────────────────────────────────── */
 .buttons {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
 .buttons button {
   flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #c3c1c1;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-
 .buttons button:hover {
-  background: #f3c796;
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary-dark);
 }
-
 .buttons button.active {
-  background: #e27c07;
+  background: var(--primary);
   color: #fff;
-  border-color: #000;
-  border-width: 3px;
+  border-color: var(--primary);
+  font-weight: 600;
 }
 
-.monthly-cancellations-container {
-  padding: 2rem;
-  width: calc(100%/3);
-  height: max-content;
+/* ── Column header ───────────────────────────────────── */
+.monthly-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
 }
 
-.monthly-cancellations {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-.monthly{
-  margin-bottom: 2rem;
-}
-
+/* ── List ────────────────────────────────────────────── */
 .monthly-list {
   list-style: none;
   padding: 0;
-  margin-block-start: 0em;
+  margin: 0;
 }
 
 .monthly-item {
-  padding: 0.8rem 0;
-  border-bottom: 1px solid #eee;
-  align-items: center;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
 }
+.monthly-item:last-child { border-bottom: none; }
+.monthly-item:hover { background: var(--bg); }
 
 .monthly-item.high-cancellation {
-  background-color: #ffe5e5; /* light red background */
+  background: var(--danger-light);
+  border-left: 3px solid var(--danger);
+  padding-left: 4px;
 }
-
 .monthly-item.high-cancellation .monthly-cancellation-col-user,
-.monthly-item.high-cancellation .monthly-cancellation-col-score,
-.monthly-item.high-cancellation .monthly-cancellation-col-cancellations {
-  color: red;
+.monthly-item.high-cancellation .monthly-cancellation-col-cancellations,
+.monthly-item.high-cancellation .monthly-cancellation-col-score {
+  color: var(--danger);
 }
 
 .monthly-info {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  padding: 0.55rem 0.25rem;
 }
 
-.monthly-user {
-  font-weight: 600;
-}
-
-.monthly-status {
-  font-weight: bold;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.bad-monthly .monthly-status {
-  background-color: #f44336;
-  color: white;
-}
-
-.good-monthly .monthly-status {
-  background-color: #4caf50;
-  color: white;
-}
-
-.bad-monthly {
-  border-left: 4px solid #f44336;
-}
-
-.good-monthly {
-  border-left: 4px solid #4caf50;
-}
-
-.monthly-header {
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
-  padding: 0.5rem 0;
-  border-bottom: 2px solid #ccc;
-}
-
-/* Fixed column widths */
+/* ── Column widths ───────────────────────────────────── */
 .monthly-cancellation-col-user {
-  width: 30%;
-  margin-right: 1rem;
+  flex: 2;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-left: 1vw;
 }
 
-.monthly-cancellation-col-time {
-  width: 30%;
-  font-size: 0.9rem;
-}
-
-.monthly-cancellation-col-cancellations {
-  width: 30%;
-  text-align: center;
-}
-
+.monthly-cancellation-col-cancellations,
 .monthly-cancellation-col-score {
-  width: 30%;
+  flex: 1;
   text-align: center;
-}
-
-.tooltip-container {
-  position: relative;
-  cursor: help;
-}
-
-.tooltip-text {
-  visibility: hidden;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  padding: 6px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  white-space: nowrap;
-
-  position: absolute;
-  z-index: 10;
-  bottom: 125%;
-  /* above the text */
-  left: 50%;
-  transform: translateX(-50%);
-
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.tooltip-container:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
+  font-size: 0.82rem;
+  color: var(--text);
 }

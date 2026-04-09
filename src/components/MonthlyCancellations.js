@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './MonthlyCancellations.css';
+import api from '../api';
+import Loader from './Loader';
 
 export default function MonthlyCancellations() {
   const [data, setData] = useState([]);
@@ -10,17 +12,10 @@ export default function MonthlyCancellations() {
   const [loading, setLoading] = useState(true);
   const [activeMonth, setActiveMonth] = useState('current');
 
-  // Fetch monthly data
   useEffect(() => {
-    fetch('https://brief-stable-penguin.ngrok-free.app/monthly_cancellations', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
-    })
-      .then(res => res.json())
-      .then(rawData => {
+    api.get('/monthly_cancellations')
+      .then(res => {
+        const rawData = res.data;
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
@@ -62,17 +57,14 @@ export default function MonthlyCancellations() {
       });
   }, []);
 
-  if (loading) {
-    return <p>Loading cancellations…</p>;
-  }
+  if (loading) return <Loader text="Loading cancellations…" />;
 
   const displayData = activeMonth === 'current' ? data : dataLastMonth;
   const displayHeader = activeMonth === 'current' ? headerMonth : headerLastMonth;
   const displayYear = activeMonth === 'current' ? new Date().getFullYear() : headerLastYear;
 
   return (
-    <section className="monthly-cancellations-container">
-      <div className="monthly-cancellations">
+    <section className="monthly-cancellations">
         <header className="title">
           <h2 className="card-title">Monthly Cancellations for {displayHeader} {displayYear}</h2>
         </header>
@@ -108,11 +100,11 @@ export default function MonthlyCancellations() {
               </span>
             </div>
             <ul className="monthly-list">
-              {displayData.slice(0, 30).map((canceller, idx) => {
+              {displayData.slice(0, 30).map((canceller) => {
                 const isHigh = parseInt(canceller.cancellation_count, 10) > 2;
                 return (
                   <li
-                    key={idx}
+                    key={canceller.user_id}
                     className={`monthly-item ${isHigh ? 'high-cancellation' : ''}`}
                   >
                     <div className="monthly-info">
@@ -126,7 +118,6 @@ export default function MonthlyCancellations() {
             </ul>
           </article>
         )}
-      </div>
     </section>
   );
 }

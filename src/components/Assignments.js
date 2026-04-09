@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import './Assignements.css';
+import './Assignments.css';
 import { formatTimestamp } from '../utils/dates';
+import api from '../api';
+import Loader from './Loader';
 
 function Assignments() {
   const [assignments, setAssignments] = useState([]);
@@ -8,19 +10,9 @@ function Assignments() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('https://brief-stable-penguin.ngrok-free.app/today_assignments', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
-    })
+    api.get('/today_assignments')
       .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        setAssignments(data);
+        setAssignments(res.data);
         setLoading(false);
       })
       .catch((err) => {
@@ -31,7 +23,7 @@ function Assignments() {
   }, []);
 
 
-  if (loading) return <p className="loader">Loading assignments...</p>;
+  if (loading) return <Loader text="Loading assignments…" />;
   if (error) return <p className="error">Error: {error}</p>;
 
   return (

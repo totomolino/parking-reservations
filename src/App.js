@@ -1,7 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, NavLink } from 'react-router-dom';
 import './App.css';
-import Assignements from './components/Assignements';
+import Assignments from './components/Assignments';
 import Location from './components/Location';
 import Home from './components/Home';
 import TopCancellers from './components/TopCancellers';
@@ -12,14 +12,16 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <img src="/zs_logo.png" alt="Logo" className="logo-image" />
-          <h1 className="logo">ZS Parking App</h1>
+          <Link to="/" className="header-brand">
+            <img src="/zs_logo.png" alt="Logo" className="logo-image" />
+            <h1 className="logo">ZS Parking</h1>
+          </Link>
           <nav>
             <ul className="nav-links">
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/assignements">Assignments</Link></li>
-              <li><Link to="/top_cancellers">Top Cancellers</Link></li>
-              <li><Link to="/roster">Roster</Link></li>
+              <li><NavLink to="/" end>Home</NavLink></li>
+              <li><NavLink to="/assignments">Assignments</NavLink></li>
+              <li><NavLink to="/top_cancellers">Top Cancellers</NavLink></li>
+              <li><NavLink to="/roster">Roster</NavLink></li>
             </ul>
           </nav>
         </header>
@@ -27,7 +29,7 @@ function App() {
         <main className="App-content">
           <Routes>
             <Route path="/" element={<Home/>} />
-            <Route path="/assignements" element={<Assignements />} />
+            <Route path="/assignments" element={<Assignments />} />
             <Route path="/location" element={<Location />} />
             <Route path="/top_cancellers" element={<TopCancellers />} />
             <Route path="/roster" element={<Roster />} />
