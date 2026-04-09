@@ -242,3 +242,89 @@
   font-size: 0.75rem;
   color: var(--text-muted);
 }
+
+/* ── Permanent Assignments ───────────────────────────── */
+.perm-add-form {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.perm-search-wrap {
+  position: relative;
+  flex: 2;
+  min-width: 180px;
+}
+
+.perm-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  z-index: 20;
+}
+
+.perm-input {
+  width: 100%;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.perm-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(226,124,7,0.15);
+}
+
+.perm-slot-input {
+  flex: 0 0 90px;
+  min-width: 0;
+}
+
+.perm-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.perm-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.perm-item:last-child { border-bottom: none; }
+
+.perm-slot {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 60px;
+}
+
+.perm-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.perm-phone {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Permanent pin on slot cards ─────────────────────── */
+.slot-card--permanent {
+  border-color: var(--primary) !important;
+}
+
+.perm-pin {
+  font-size: 0.65rem;
+  margin-left: 0.25rem;
+}

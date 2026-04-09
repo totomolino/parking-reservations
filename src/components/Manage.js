@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../api';
 import Loader from './Loader';
 import AssignModal from './AssignModal';
@@ -11,16 +11,29 @@ const GROUPS = [
 ];
 
 export default function Manage() {
-  const [slots, setSlots]           = useState([]);
-  const [waitingList, setWaitingList] = useState([]);
-  const [parkingDate, setParkingDate] = useState('');
-  const [loading, setLoading]       = useState(true);
-  const [assignTarget, setAssignTarget] = useState(null); // slot to assign
-  const [showSwap, setShowSwap]     = useState(false);
-  const [releaseLoading, setReleaseLoading] = useState(null); // slot number being released
-  const [wlLoading, setWlLoading]   = useState(null); // phone being removed from WL
-  const [notify, setNotify]         = useState(true);
+  const [slots, setSlots]               = useState([]);
+  const [waitingList, setWaitingList]   = useState([]);
+  const [parkingDate, setParkingDate]   = useState('');
+  const [loading, setLoading]           = useState(true);
+  const [assignTarget, setAssignTarget] = useState(null);
+  const [showSwap, setShowSwap]         = useState(false);
+  const [releaseLoading, setReleaseLoading] = useState(null);
+  const [wlLoading, setWlLoading]       = useState(null);
+  const [notify, setNotify]             = useState(true);
 
+  // ── Permanent slots state ──────────────────────────────
+  const [permanents, setPermanents]         = useState([]);
+  const [permLoading, setPermLoading]       = useState(true);
+  const [permQuery, setPermQuery]           = useState('');
+  const [permRoster, setPermRoster]         = useState([]);
+  const [permFiltered, setPermFiltered]     = useState([]);
+  const [permSelected, setPermSelected]     = useState(null);
+  const [permSlotInput, setPermSlotInput]   = useState('');
+  const [permSaving, setPermSaving]         = useState(false);
+  const [permRemoveLoading, setPermRemoveLoading] = useState(null);
+  const permInputRef = useRef(null);
+
+  // ── Fetch live slot state ──────────────────────────────
   const fetchLive = useCallback(() => {
     api.get('/admin/live-slots')
       .then(r => {
@@ -29,15 +42,31 @@ export default function Manage() {
         setParkingDate(r.data.parkingDate);
         setLoading(false);
       })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+      .catch(err => { console.error(err); setLoading(false); });
   }, []);
 
-  useEffect(() => { fetchLive(); }, [fetchLive]);
+  // ── Fetch permanent assignments ────────────────────────
+  const fetchPermanents = useCallback(() => {
+    setPermLoading(true);
+    api.get('/admin/permanent-slots')
+      .then(r => { setPermanents(r.data); setPermLoading(false); })
+      .catch(err => { console.error(err); setPermLoading(false); });
+  }, []);
 
-  // ── Release a slot ───────────────────────────────────
+  useEffect(() => {
+    fetchLive();
+    fetchPermanents();
+    api.get('/roster').then(r => setPermRoster(r.data)).catch(console.error);
+  }, [fetchLive, fetchPermanents]);
+
+  // Filter roster as user types in permanent-assign search
+  useEffect(() => {
+    if (!permQuery.trim()) { setPermFiltered([]); return; }
+    const q = permQuery.toLowerCase();
+    setPermFiltered(permRoster.filter(u => u.name.toLowerCase().includes(q)).slice(0, 6));
+  }, [permQuery, permRoster]);
+
+  // ── Release a slot ─────────────────────────────────────
   const handleRelease = async (slot) => {
     if (!window.confirm(`Release slot ${slot.number} from ${slot.assignedTo}?`)) return;
     setReleaseLoading(slot.number);
@@ -51,7 +80,7 @@ export default function Manage() {
     }
   };
 
-  // ── Remove from waiting list ─────────────────────────
+  // ── Remove from waiting list ───────────────────────────
   const handleWlRemove = async (person) => {
     if (!window.confirm(`Remove ${person.name} from the waiting list?`)) return;
     setWlLoading(person.phone);
@@ -62,6 +91,42 @@ export default function Manage() {
       alert(err.response?.data?.message || 'Remove failed');
     } finally {
       setWlLoading(null);
+    }
+  };
+
+  // ── Add permanent assignment ───────────────────────────
+  const handlePermAdd = async () => {
+    if (!permSelected || !permSlotInput) return;
+    setPermSaving(true);
+    try {
+      await api.post('/admin/permanent-slots', {
+        slotNumber: Number(permSlotInput),
+        userId: permSelected.id,
+      });
+      setPermQuery('');
+      setPermSelected(null);
+      setPermSlotInput('');
+      setPermFiltered([]);
+      fetchPermanents();
+      fetchLive();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to save permanent assignment');
+    } finally {
+      setPermSaving(false);
+    }
+  };
+
+  // ── Remove permanent assignment ────────────────────────
+  const handlePermRemove = async (slotNumber) => {
+    if (!window.confirm(`Remove permanent assignment for slot ${slotNumber}?\nThe slot stays assigned today but will be released on next daily reset.`)) return;
+    setPermRemoveLoading(slotNumber);
+    try {
+      await api.delete(`/admin/permanent-slots/${slotNumber}`);
+      fetchPermanents();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Remove failed');
+    } finally {
+      setPermRemoveLoading(null);
     }
   };
 
@@ -88,6 +153,81 @@ export default function Manage() {
         </div>
       </div>
 
+      {/* ── Permanent Assignments ─────────────────────── */}
+      <div className="manage-group">
+        <h2 className="manage-group-title">
+          Permanent Assignments
+          <span className="wl-count">{permanents.length}</span>
+        </h2>
+
+        {/* Add form */}
+        <div className="perm-add-form">
+          <div className="perm-search-wrap">
+            <input
+              ref={permInputRef}
+              className="perm-input"
+              placeholder="Search person…"
+              value={permQuery}
+              onChange={e => { setPermQuery(e.target.value); setPermSelected(null); }}
+            />
+            {permFiltered.length > 0 && (
+              <ul className="modal-suggestions perm-suggestions">
+                {permFiltered.map(u => (
+                  <li
+                    key={u.id}
+                    className={`modal-suggestion-item ${permSelected?.id === u.id ? 'selected' : ''}`}
+                    onClick={() => { setPermSelected(u); setPermQuery(u.name); setPermFiltered([]); }}
+                  >
+                    <span className="sug-name">{u.name}</span>
+                    <span className="sug-meta">P{u.priority}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <input
+            className="perm-input perm-slot-input"
+            type="number"
+            placeholder="Slot #"
+            value={permSlotInput}
+            onChange={e => setPermSlotInput(e.target.value)}
+          />
+          <button
+            className="btn-refresh"
+            onClick={handlePermAdd}
+            disabled={!permSelected || !permSlotInput || permSaving}
+          >
+            {permSaving ? 'Saving…' : '+ Add'}
+          </button>
+        </div>
+
+        {/* Current list */}
+        {permLoading
+          ? <Loader text="Loading…" />
+          : permanents.length === 0
+            ? <p className="wl-empty">No permanent assignments yet.</p>
+            : (
+              <div className="perm-list">
+                {permanents.map(p => (
+                  <div key={p.slot_number} className="perm-item">
+                    <span className="perm-slot">Slot {p.slot_number}</span>
+                    <span className="perm-name">{p.name}</span>
+                    <span className="perm-phone">{p.phone}</span>
+                    <button
+                      className="slot-btn slot-btn--release"
+                      style={{ flex: 'none', padding: '0.28rem 0.75rem' }}
+                      onClick={() => handlePermRemove(p.slot_number)}
+                      disabled={permRemoveLoading === p.slot_number}
+                    >
+                      {permRemoveLoading === p.slot_number ? '…' : 'Remove'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )
+        }
+      </div>
+
       {/* ── Slot groups ──────────────────────────────── */}
       {GROUPS.map(group => (
         <div key={group.label} className="manage-group">
@@ -96,10 +236,14 @@ export default function Manage() {
             {group.numbers.map(num => {
               const slot = slotMap[num];
               if (!slot) return null;
+              const isPermanent = permanents.some(p => p.slot_number === num);
               return (
-                <div key={num} className={`slot-card slot-card--${slot.status}`}>
+                <div key={num} className={`slot-card slot-card--${slot.status}${isPermanent ? ' slot-card--permanent' : ''}`}>
                   <div className="slot-card-header">
-                    <span className="slot-card-number">#{slot.number}</span>
+                    <span className="slot-card-number">
+                      #{slot.number}
+                      {isPermanent && <span className="perm-pin" title="Permanent assignment">📌</span>}
+                    </span>
                     <span className={`slot-card-badge badge-${slot.status}`}>
                       {slot.status}
                     </span>
