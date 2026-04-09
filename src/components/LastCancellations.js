@@ -12,7 +12,12 @@ export default function LastCancellations() {
   useEffect(() => {
     api.get('/last_cancellations')
       .then(res => {
-        setData(res.data);
+        const fifteenDaysMs = 15 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const filtered = res.data.filter(item =>
+          now - new Date(item.cancellation_time).getTime() <= fifteenDaysMs
+        );
+        setData(filtered);
         setLoading(false);
       })
       .catch(err => {
@@ -33,10 +38,7 @@ export default function LastCancellations() {
           <tr>
             <th>User</th>
             <th>Time</th>
-            <th className="tooltip-container col-center">
-              Score 🛈
-              <span className="tooltip-text">User's score after cancellation</span>
-            </th>
+            <th className="col-center">Score</th>
             <th className="col-center">Status</th>
           </tr>
         </thead>
