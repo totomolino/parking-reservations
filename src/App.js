@@ -7,6 +7,7 @@ import Home from './components/Home';
 import TopCancellers from './components/TopCancellers';
 import Roster from './components/Roster';
 import Manage from './components/Manage';
+import CheckIn from './components/CheckIn';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <li><NavLink to="/top_cancellers">Top Cancellers</NavLink></li>
               <li><NavLink to="/roster">Roster</NavLink></li>
               <li><NavLink to="/manage">Manage</NavLink></li>
+              <li><NavLink to="/checkin">Check-in</NavLink></li>
             </ul>
           </nav>
         </header>
@@ -36,6 +38,7 @@ function App() {
             <Route path="/top_cancellers" element={<TopCancellers />} />
             <Route path="/roster" element={<Roster />} />
             <Route path="/manage" element={<Manage />} />
+            <Route path="/checkin" element={<CheckIn />} />
           </Routes>
         </main>
 
