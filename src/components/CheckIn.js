@@ -41,6 +41,7 @@ export default function CheckIn() {
         openMin:      r.data.openMin,
         deadlineHour: r.data.deadlineHour,
         deadlineMin:  r.data.deadlineMin,
+        enableNoshowPenalty:   r.data.enableNoshowPenalty,
       });
     }).catch(console.error);
   }, []);
@@ -184,6 +185,22 @@ export default function CheckIn() {
               >
                 Open in Google Maps ↗
               </a>
+            </div>
+
+            <div className="ci-config-group">
+              <label className="ci-label">No-Show Penalty</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  id="enablePenalty"
+                  checked={configForm.enableNoshowPenalty ?? true}
+                  onChange={e => setConfigForm(f => ({ ...f, enableNoshowPenalty: e.target.checked }))}
+                  style={{ cursor: 'pointer' }}
+                />
+                <label htmlFor="enablePenalty" style={{ cursor: 'pointer', margin: 0 }}>
+                  Apply 2x penalty for no-shows
+                </label>
+              </div>
             </div>
 
             <div className="ci-config-actions">
