@@ -1,4 +1,35 @@
 .Home {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.home-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.refresh-all-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.refresh-all-btn:hover {
+  background: var(--primary-dark);
+}
+
+.refresh-all-btn:active {
+  opacity: 0.8;
+}
+
+.home-content {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
@@ -6,13 +37,13 @@
 }
 
 @media (max-width: 1100px) {
-  .Home {
+  .home-content {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 680px) {
-  .Home {
+  .home-content {
     grid-template-columns: 1fr;
   }
 }

@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import './ParkingComparison.css';
 import api from '../api';
 import Loader from './Loader';
 
-export default function ParkingComparison() {
+const ParkingComparison = forwardRef(function ParkingComparison(props, ref) {
   const [data, setData] = useState({ today: null, yesterday: null });
   const [selected, setSelected] = useState('today');
   const [health, setHealth] = useState(null);
   const [balance, setBalance] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const buildWhatsAppLink = (phone, message) => {
     const clean = phone.replace(/\D/g, '');
@@ -15,33 +16,66 @@ export default function ParkingComparison() {
     return `https://wa.me/${clean}?text=${text}`;
   };
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
+    setLoading(true);
     Promise.allSettled([
       api.get('/parking-data'),
       api.get('/health'),
       api.get('/twilio-balance'),
     ]).then(([parkingResult, healthResult, balanceResult]) => {
       if (parkingResult.status === 'fulfilled') {
-        setData(parkingResult.value.data);
+        const newData = parkingResult.value.data;
+        setData(newData);
+        localStorage.setItem('parkingData', JSON.stringify(newData));
       } else {
         console.error('Parking data fetch failed:', parkingResult.reason);
       }
 
       if (healthResult.status === 'fulfilled') {
-        setHealth(String(healthResult.value.data).trim());
+        const healthStr = String(healthResult.value.data).trim();
+        setHealth(healthStr);
+        localStorage.setItem('parkingHealth', healthStr);
       } else {
         console.error('Health check failed:', healthResult.reason);
         setHealth('FAIL');
       }
 
       if (balanceResult.status === 'fulfilled') {
-        setBalance(`$${balanceResult.value.data.balance}`);
+        const balanceStr = `$${balanceResult.value.data.balance}`;
+        setBalance(balanceStr);
+        localStorage.setItem('parkingBalance', balanceStr);
       } else {
         console.error('Twilio balance check failed:', balanceResult.reason);
         setBalance('FAIL');
       }
+      setLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    // Try loading from cache first
+    const cachedData = localStorage.getItem('parkingData');
+    const cachedHealth = localStorage.getItem('parkingHealth');
+    const cachedBalance = localStorage.getItem('parkingBalance');
+
+    if (cachedData) {
+      setData(JSON.parse(cachedData));
+    }
+    if (cachedHealth) {
+      setHealth(cachedHealth);
+    }
+    if (cachedBalance) {
+      setBalance(cachedBalance);
+    }
+    setLoading(false);
+
+    // Fetch fresh data in background
+    fetchData();
+  }, [fetchData]);
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchData,
+  }), [fetchData]);
 
   if (!data.today || !data.yesterday) {
     return <Loader text="Loading parking data…" />;
@@ -52,7 +86,7 @@ export default function ParkingComparison() {
   const healthClass = health === 'OK' ? 'healthy' : 'unhealthy';
 
   return (
-    <section className="parking-comparison">
+    <section className="parking-comparison" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
         <header className="status-metric">
           <div>
             <strong>System Status: </strong>
@@ -129,4 +163,6 @@ export default function ParkingComparison() {
 
     </section>
   );
-}
+});
+
+export default ParkingComparison;

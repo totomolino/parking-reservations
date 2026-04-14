@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import './MonthlyCancellations.css';
 import api from '../api';
 import Loader from './Loader';
 
-export default function MonthlyCancellations() {
+const MonthlyCancellations = forwardRef(function MonthlyCancellations(props, ref) {
   const [data, setData] = useState([]);
   const [dataLastMonth, setDataLastMonth] = useState([]);
   const [headerMonth, setHeaderMonth] = useState('');
@@ -12,7 +12,8 @@ export default function MonthlyCancellations() {
   const [loading, setLoading] = useState(true);
   const [activeMonth, setActiveMonth] = useState('current');
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
+    setLoading(true);
     api.get('/monthly_cancellations')
       .then(res => {
         const rawData = res.data;
@@ -49,6 +50,15 @@ export default function MonthlyCancellations() {
         });
         setDataLastMonth(filteredLast);
 
+        // Cache the entire state
+        localStorage.setItem('monthlyCancellations', JSON.stringify({
+          current: filteredCurrent,
+          last: filteredLast,
+          headerMonth: capitalizedMonthName,
+          headerLastMonth: capitalizedLastMonthName,
+          headerLastYear: lastYear,
+        }));
+
         setLoading(false);
       })
       .catch(err => {
@@ -56,6 +66,27 @@ export default function MonthlyCancellations() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    // Try loading from cache first
+    const cached = localStorage.getItem('monthlyCancellations');
+    if (cached) {
+      const { current, last, headerMonth, headerLastMonth, headerLastYear } = JSON.parse(cached);
+      setData(current);
+      setDataLastMonth(last);
+      setHeaderMonth(headerMonth);
+      setHeaderLastMonth(headerLastMonth);
+      setHeaderLastYear(headerLastYear);
+      setLoading(false);
+    }
+
+    // Fetch fresh data in background
+    fetchData();
+  }, [fetchData]);
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchData,
+  }), [fetchData]);
 
   if (loading) return <Loader text="Loading cancellations…" />;
 
@@ -120,4 +151,6 @@ export default function MonthlyCancellations() {
         )}
     </section>
   );
-}
+});
+
+export default MonthlyCancellations;

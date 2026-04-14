@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import './LastCancellations.css';
 import { formatTimestamp } from '../utils/dates';
 import api from '../api';
 import Loader from './Loader';
 
-export default function LastCancellations() {
+const LastCancellations = forwardRef(function LastCancellations(props, ref) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    api.get('/last_cancellations')
+  const fetchData = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    api.get('/last_cancellations?limit=100')
       .then(res => {
         const fifteenDaysMs = 15 * 24 * 60 * 60 * 1000;
         const now = Date.now();
@@ -18,6 +20,7 @@ export default function LastCancellations() {
           now - new Date(item.cancellation_time).getTime() <= fifteenDaysMs
         );
         setData(filtered);
+        localStorage.setItem('lastCancellations', JSON.stringify(filtered));
         setLoading(false);
       })
       .catch(err => {
@@ -26,6 +29,22 @@ export default function LastCancellations() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    // Try loading from cache first
+    const cached = localStorage.getItem('lastCancellations');
+    if (cached) {
+      setData(JSON.parse(cached));
+      setLoading(false);
+    }
+
+    // Fetch fresh data in background
+    fetchData();
+  }, [fetchData]);
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchData,
+  }), [fetchData]);
 
   if (loading) return <Loader text="Loading cancellations…" />;
   if (error) return <p className="error">Error: {error}</p>;
@@ -59,4 +78,6 @@ export default function LastCancellations() {
       </table>
     </section>
   );
-}
+});
+
+export default LastCancellations;

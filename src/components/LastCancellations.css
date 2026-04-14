@@ -5,6 +5,10 @@
   padding: 1.25rem 1.5rem;
 }
 
+.last-cancellations .card-title {
+  margin: 0 0 1rem 0;
+}
+
 .lc-table {
   width: 100%;
   border-collapse: collapse;

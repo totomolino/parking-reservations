@@ -5,6 +5,10 @@
   padding: 1.25rem 1.5rem;
 }
 
+.monthly-cancellations .card-title {
+  margin: 0 0 1rem 0;
+}
+
 /* ── Toggle buttons ──────────────────────────────────── */
 .buttons {
   display: flex;
