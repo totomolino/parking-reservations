@@ -20,6 +20,7 @@ const MonthlyCancellations = forwardRef(function MonthlyCancellations(props, ref
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
+        const timestamp = Date.now();
 
         // Compute last month and its year
         const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
@@ -50,13 +51,14 @@ const MonthlyCancellations = forwardRef(function MonthlyCancellations(props, ref
         });
         setDataLastMonth(filteredLast);
 
-        // Cache the entire state
+        // Cache the entire state with timestamp
         localStorage.setItem('monthlyCancellations', JSON.stringify({
           current: filteredCurrent,
           last: filteredLast,
           headerMonth: capitalizedMonthName,
           headerLastMonth: capitalizedLastMonthName,
           headerLastYear: lastYear,
+          timestamp,
         }));
 
         setLoading(false);
@@ -68,20 +70,35 @@ const MonthlyCancellations = forwardRef(function MonthlyCancellations(props, ref
   }, []);
 
   useEffect(() => {
+    const fiveMinutesMs = 5 * 60 * 1000;
+    const now = Date.now();
+    let shouldFetch = true;
+
     // Try loading from cache first
     const cached = localStorage.getItem('monthlyCancellations');
     if (cached) {
-      const { current, last, headerMonth, headerLastMonth, headerLastYear } = JSON.parse(cached);
-      setData(current);
-      setDataLastMonth(last);
-      setHeaderMonth(headerMonth);
-      setHeaderLastMonth(headerLastMonth);
-      setHeaderLastYear(headerLastYear);
-      setLoading(false);
+      try {
+        const { current, last, headerMonth, headerLastMonth, headerLastYear, timestamp } = JSON.parse(cached);
+        setData(current);
+        setDataLastMonth(last);
+        setHeaderMonth(headerMonth);
+        setHeaderLastMonth(headerLastMonth);
+        setHeaderLastYear(headerLastYear);
+        setLoading(false);
+
+        // Only fetch if cache is older than 5 minutes
+        if (now - timestamp <= fiveMinutesMs) {
+          shouldFetch = false;
+        }
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
     }
 
-    // Fetch fresh data in background
-    fetchData();
+    // Only fetch if cache is older than 5 minutes or missing
+    if (shouldFetch) {
+      fetchData();
+    }
   }, [fetchData]);
 
   useImperativeHandle(ref, () => ({

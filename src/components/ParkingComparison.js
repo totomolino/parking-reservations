@@ -23,10 +23,11 @@ const ParkingComparison = forwardRef(function ParkingComparison(props, ref) {
       api.get('/health'),
       api.get('/twilio-balance'),
     ]).then(([parkingResult, healthResult, balanceResult]) => {
+      const now = Date.now();
       if (parkingResult.status === 'fulfilled') {
         const newData = parkingResult.value.data;
         setData(newData);
-        localStorage.setItem('parkingData', JSON.stringify(newData));
+        localStorage.setItem('parkingData', JSON.stringify({ data: newData, timestamp: now }));
       } else {
         console.error('Parking data fetch failed:', parkingResult.reason);
       }
@@ -34,7 +35,7 @@ const ParkingComparison = forwardRef(function ParkingComparison(props, ref) {
       if (healthResult.status === 'fulfilled') {
         const healthStr = String(healthResult.value.data).trim();
         setHealth(healthStr);
-        localStorage.setItem('parkingHealth', healthStr);
+        localStorage.setItem('parkingHealth', JSON.stringify({ data: healthStr, timestamp: now }));
       } else {
         console.error('Health check failed:', healthResult.reason);
         setHealth('FAIL');
@@ -43,7 +44,7 @@ const ParkingComparison = forwardRef(function ParkingComparison(props, ref) {
       if (balanceResult.status === 'fulfilled') {
         const balanceStr = `$${balanceResult.value.data.balance}`;
         setBalance(balanceStr);
-        localStorage.setItem('parkingBalance', balanceStr);
+        localStorage.setItem('parkingBalance', JSON.stringify({ data: balanceStr, timestamp: now }));
       } else {
         console.error('Twilio balance check failed:', balanceResult.reason);
         setBalance('FAIL');
@@ -53,24 +54,45 @@ const ParkingComparison = forwardRef(function ParkingComparison(props, ref) {
   }, []);
 
   useEffect(() => {
+    const fiveMinutesMs = 5 * 60 * 1000;
+    const now = Date.now();
+    let shouldFetch = true;
+
     // Try loading from cache first
     const cachedData = localStorage.getItem('parkingData');
     const cachedHealth = localStorage.getItem('parkingHealth');
     const cachedBalance = localStorage.getItem('parkingBalance');
 
     if (cachedData) {
-      setData(JSON.parse(cachedData));
+      try {
+        const { data, timestamp } = JSON.parse(cachedData);
+        setData(data);
+        if (now - timestamp <= fiveMinutesMs) shouldFetch = false;
+      } catch (e) {}
     }
     if (cachedHealth) {
-      setHealth(cachedHealth);
+      try {
+        const { data } = JSON.parse(cachedHealth);
+        setHealth(data);
+      } catch (e) {}
     }
     if (cachedBalance) {
-      setBalance(cachedBalance);
+      try {
+        const { data } = JSON.parse(cachedBalance);
+        setBalance(data);
+      } catch (e) {}
     }
-    setLoading(false);
 
-    // Fetch fresh data in background
-    fetchData();
+    if (!cachedData) {
+      setLoading(false);
+    }
+
+    // Only fetch if cache is older than 5 minutes or missing
+    if (shouldFetch) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
   }, [fetchData]);
 
   useImperativeHandle(ref, () => ({

@@ -12,15 +12,15 @@ const LastCancellations = forwardRef(function LastCancellations(props, ref) {
   const fetchData = useCallback(() => {
     setLoading(true);
     setError(null);
-    api.get('/last_cancellations?limit=100')
+    api.get('/last_cancellations?limit=50')
       .then(res => {
-        const fifteenDaysMs = 15 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        const filtered = res.data.filter(item =>
-          now - new Date(item.cancellation_time).getTime() <= fifteenDaysMs
-        );
-        setData(filtered);
-        localStorage.setItem('lastCancellations', JSON.stringify(filtered));
+        // Backend now handles filtering and limiting
+        setData(res.data);
+        // Save with timestamp
+        localStorage.setItem('lastCancellations', JSON.stringify({
+          data: res.data,
+          timestamp: Date.now()
+        }));
         setLoading(false);
       })
       .catch(err => {
@@ -34,11 +34,25 @@ const LastCancellations = forwardRef(function LastCancellations(props, ref) {
     // Try loading from cache first
     const cached = localStorage.getItem('lastCancellations');
     if (cached) {
-      setData(JSON.parse(cached));
-      setLoading(false);
+      try {
+        const { data: cachedData, timestamp } = JSON.parse(cached);
+        const now = Date.now();
+        const fiveMinutesMs = 5 * 60 * 1000;
+
+        setData(cachedData);
+        setLoading(false);
+
+        // Only fetch if cache is older than 5 minutes
+        if (now - timestamp > fiveMinutesMs) {
+          fetchData();
+        }
+        return;
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
     }
 
-    // Fetch fresh data in background
+    // No cache, fetch immediately
     fetchData();
   }, [fetchData]);
 
