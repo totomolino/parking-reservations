@@ -39,20 +39,23 @@ const LastCancellations = forwardRef(function LastCancellations(props, ref) {
         const now = Date.now();
         const fiveMinutesMs = 5 * 60 * 1000;
 
-        setData(cachedData);
-        setLoading(false);
+        // Validate cached data is an array
+        if (Array.isArray(cachedData)) {
+          setData(cachedData);
+          setLoading(false);
 
-        // Only fetch if cache is older than 5 minutes
-        if (now - timestamp > fiveMinutesMs) {
-          fetchData();
+          // Only fetch if cache is older than 5 minutes
+          if (now - timestamp > fiveMinutesMs) {
+            fetchData();
+          }
+          return;
         }
-        return;
       } catch (e) {
         console.error('Cache parse error:', e);
       }
     }
 
-    // No cache, fetch immediately
+    // No cache or invalid cache, fetch immediately
     fetchData();
   }, [fetchData]);
 
@@ -76,7 +79,7 @@ const LastCancellations = forwardRef(function LastCancellations(props, ref) {
           </tr>
         </thead>
         <tbody>
-          {data.map((c) => (
+          {Array.isArray(data) && data.map((c) => (
             <tr key={c.cancellation_id} className={c.is_bad ? 'row-bad' : 'row-good'}>
               <td className="td-user">{c.name}</td>
               <td className="td-time">{formatTimestamp(c.cancellation_time)}</td>
