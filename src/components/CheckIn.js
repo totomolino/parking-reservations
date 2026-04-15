@@ -283,12 +283,27 @@ export default function CheckIn() {
                   <th>Status</th>
                   <th>Time</th>
                   <th>Distance</th>
+                  <th>Spot Check</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {checkIns.map(entry => {
                   const meta = STATUS_META[entry.status] || STATUS_META.pending;
+
+                  // Determine if we're within the mandatory check-in window
+                  const now = new Date();
+                  const currentHour = now.getHours();
+                  const currentMin = now.getMinutes();
+                  const currentMins = currentHour * 60 + currentMin;
+                  const openMins = (config?.openHour ?? 10) * 60 + (config?.openMin ?? 0);
+                  const deadlineMins = (config?.deadlineHour ?? 11) * 60 + (config?.deadlineMin ?? 30);
+                  const withinWindow = currentMins >= openMins && currentMins <= deadlineMins;
+
+                  // Show button if: (within window and not checked_in) OR (outside window and any status)
+                  const showButton = withinWindow ? entry.status !== 'checked_in' : true;
+                  const buttonLabel = withinWindow ? 'Request' : 'Spot Check';
+
                   return (
                     <tr key={entry.user_id} className={meta.cls}>
                       <td className="ci-td-slot">#{entry.slot_number}</td>
@@ -306,14 +321,19 @@ export default function CheckIn() {
                       <td className="ci-td-muted">
                         {entry.distance_m != null ? `${entry.distance_m}m` : '—'}
                       </td>
+                      <td className="ci-td-muted">
+                        {entry.spot_check_time
+                          ? `${entry.spot_check_valid ? '✅' : '⚠️'} ${new Date(entry.spot_check_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} (${entry.spot_check_distance_m}m)`
+                          : '—'}
+                      </td>
                       <td className="ci-td-actions">
-                        {entry.status !== 'checked_in' && (
+                        {showButton && (
                           <button
                             className="ci-action-btn ci-action-checkin"
                             onClick={() => handleSendCheckInRequest(entry)}
                             disabled={manualLoading === entry.user_id}
                           >
-                            {manualLoading === entry.user_id ? '…' : 'Request'}
+                            {manualLoading === entry.user_id ? '…' : buttonLabel}
                           </button>
                         )}
                       </td>
