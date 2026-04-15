@@ -107,14 +107,14 @@ export default function CheckIn() {
     }
   };
 
-  // ── Manual check-in ───────────────────────────────────────────────────────
-  const handleManualCheckIn = async (entry) => {
+  // ── Send check-in request to user ────────────────────────────────────────
+  const handleSendCheckInRequest = async (entry) => {
     setManualLoading(entry.user_id);
     try {
-      await api.post('/admin/manual-checkin', { userId: entry.user_id, slotNumber: entry.slot_number });
-      fetchBoard();
+      await api.post('/admin/send-checkin-to-user', { userId: entry.user_id });
+      alert('Check-in request sent!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Check-in failed.');
+      alert(err.response?.data?.message || 'Failed to send check-in request.');
     } finally {
       setManualLoading(null);
     }
@@ -310,10 +310,10 @@ export default function CheckIn() {
                         {entry.status !== 'checked_in' && (
                           <button
                             className="ci-action-btn ci-action-checkin"
-                            onClick={() => handleManualCheckIn(entry)}
+                            onClick={() => handleSendCheckInRequest(entry)}
                             disabled={manualLoading === entry.user_id}
                           >
-                            {manualLoading === entry.user_id ? '…' : 'Check in'}
+                            {manualLoading === entry.user_id ? '…' : 'Request'}
                           </button>
                         )}
                       </td>
