@@ -16,7 +16,6 @@
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  overflow: hidden;
 }
 
 .header-brand {
@@ -45,9 +44,8 @@
 nav {
   display: flex;
   align-items: center;
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
-  overflow: hidden;
 }
 
 .nav-links {
@@ -57,7 +55,7 @@ nav {
   margin: 0;
   padding: 0;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .nav-links li {
