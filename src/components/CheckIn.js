@@ -34,13 +34,13 @@ export default function CheckIn() {
     api.get('/admin/office-config').then(r => {
       setConfig(r.data);
       setConfigForm({
-        lat:          r.data.lat,
-        lng:          r.data.lng,
-        radiusM:      r.data.radiusM,
-        openHour:     r.data.openHour,
-        openMin:      r.data.openMin,
-        deadlineHour: r.data.deadlineHour,
-        deadlineMin:  r.data.deadlineMin,
+        lat:                  r.data.lat,
+        lng:                  r.data.lng,
+        radiusM:              r.data.radiusM,
+        openHour:             r.data.openHour,
+        openMin:              r.data.openMin,
+        deadlineHour:         r.data.deadlineHour,
+        deadlineMin:          r.data.deadlineMin,
         enableNoshowPenalty:   r.data.enableNoshowPenalty,
       });
     }).catch(console.error);
@@ -315,7 +315,7 @@ export default function CheckIn() {
                       </td>
                       <td className="ci-td-muted">
                         {entry.check_in_time
-                          ? new Date(entry.check_in_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                          ? entry.check_in_time.slice(11, 16)
                           : '—'}
                       </td>
                       <td className="ci-td-muted">
@@ -323,7 +323,7 @@ export default function CheckIn() {
                       </td>
                       <td className="ci-td-muted">
                         {entry.spot_check_time
-                          ? `${entry.spot_check_valid ? '✅' : '⚠️'} ${new Date(entry.spot_check_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} (${entry.spot_check_distance_m}m)`
+                          ? `${entry.spot_check_valid ? '✅' : '⚠️'} ${entry.spot_check_time.slice(11, 16)} (${entry.spot_check_distance_m}m)`
                           : '—'}
                       </td>
                       <td className="ci-td-actions">
