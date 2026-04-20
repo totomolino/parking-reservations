@@ -70,6 +70,21 @@ export default function Insights() {
   // Reset page when filters change
   useEffect(() => { setPage(1); }, [verdictFilter, nameSearch]);
 
+  // Auto-load last used date range on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('insights_range');
+    if (!saved) return;
+    const { from, to } = JSON.parse(saved);
+    if (!from || !to) return;
+    setFromDate(from);
+    setToDate(to);
+    setFetching(true);
+    api.get('/admin/parking-insights', { params: { from, to } })
+      .then(r => setRows(r.data))
+      .catch(() => {})
+      .finally(() => setFetching(false));
+  }, []);
+
   const handleUpload = async () => {
     if (!file) return;
     setUploading(true);
@@ -101,6 +116,7 @@ export default function Insights() {
       setRows(r.data.rows);
       setFromDate(r.data.from);
       setToDate(r.data.to);
+      localStorage.setItem('insights_range', JSON.stringify({ from: r.data.from, to: r.data.to }));
       setVerdictFilter('All');
       setNameSearch('');
     } catch (err) {
@@ -117,6 +133,7 @@ export default function Insights() {
     try {
       const r = await api.get('/admin/parking-insights', { params: { from: fromDate, to: toDate } });
       setRows(r.data);
+      localStorage.setItem('insights_range', JSON.stringify({ from: fromDate, to: toDate }));
       setVerdictFilter('All');
       setNameSearch('');
     } catch (err) {
