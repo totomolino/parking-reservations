@@ -70,17 +70,17 @@ export default function Insights() {
   // Reset page when filters change
   useEffect(() => { setPage(1); }, [verdictFilter, nameSearch]);
 
-  // Auto-load last used date range on mount
+  // Auto-load on mount: fetch available date range from DB, then load all stored rows
   useEffect(() => {
-    const saved = localStorage.getItem('insights_range');
-    if (!saved) return;
-    const { from, to } = JSON.parse(saved);
-    if (!from || !to) return;
-    setFromDate(from);
-    setToDate(to);
-    setFetching(true);
-    api.get('/admin/parking-insights', { params: { from, to } })
-      .then(r => setRows(r.data))
+    api.get('/admin/parking-insights/range')
+      .then(({ data }) => {
+        if (!data.from_date || !data.to_date) return;
+        setFromDate(data.from_date);
+        setToDate(data.to_date);
+        setFetching(true);
+        return api.get('/admin/parking-insights', { params: { from: data.from_date, to: data.to_date } });
+      })
+      .then(r => r && setRows(r.data))
       .catch(() => {})
       .finally(() => setFetching(false));
   }, []);
