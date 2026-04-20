@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import api from '../api';
 import './Insights.css';
 
@@ -22,17 +23,36 @@ export default function Insights() {
     if (!file) return;
     setUploading(true);
     setError(null);
-    const formData = new FormData();
-    formData.append('file', file);
     try {
-      const r = await api.post('/admin/parking-insights', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Parse xlsx client-side — send JSON to avoid Zscaler file upload block
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: 'array', raw: false });
+      if (!wb.SheetNames.includes('Daily_ZS_Summary')) {
+        setError('Sheet "Daily_ZS_Summary" not found. Upload merged_all_time.xlsx.');
+        return;
+      }
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets['Daily_ZS_Summary'], { raw: false });
+      const attendance = rows
+        .map(row => ({
+          zs_id:      String(row.zs_id || '').trim(),
+          day:        String(row.Day || '').split('T')[0].trim(),
+          entry_time: row.entry_time || null,
+          leave_time: row.leave_time || null,
+          stay_hours: row.stay_hours ?? null,
+        }))
+        .filter(r => r.zs_id && r.day);
+
+      if (attendance.length === 0) {
+        setError('No valid rows found in Daily_ZS_Summary sheet.');
+        return;
+      }
+
+      const r = await api.post('/admin/parking-insights', { attendance });
       setRows(r.data.rows);
       setFromDate(r.data.from);
       setToDate(r.data.to);
     } catch (err) {
-      setError(err.response?.data?.message || 'Upload failed.');
+      setError(err.response?.data?.message || 'Processing failed.');
     } finally {
       setUploading(false);
     }
@@ -82,8 +102,8 @@ export default function Insights() {
       <div className="ins-card">
         <h2 className="ins-card-title">Upload Attendance File</h2>
         <p className="ins-hint">
-          Upload the <code>merged_all_time.xlsx</code> file from the normalization script.
-          The system will cross-reference it with parking assignments from the DB.
+          Upload <code>merged_all_time.xlsx</code> from the normalization script.
+          The file is parsed locally in your browser — no binary upload to the server.
         </p>
         <div className="ins-upload-row">
           <input
