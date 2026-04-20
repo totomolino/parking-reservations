@@ -169,3 +169,118 @@
 .ins-badge-good     { background: #dcfce7; color: #16a34a; }
 .ins-badge-bad      { background: #fef9c3; color: #d97706; }
 .ins-badge-horrible { background: #fee2e2; color: #dc2626; }
+
+/* ── Insight Cards ────────────────────────────────── */
+.ins-insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .ins-insight-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.ins-insight-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.ins-insight-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.ins-insight-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+
+.ins-insight-value--sm {
+  font-size: 1.25rem;
+}
+
+.ins-insight-sub {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.ins-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-top: 0.25rem;
+}
+
+.ins-mini-table td {
+  padding: 0.2rem 0;
+  color: #374151;
+}
+
+.ins-mini-count {
+  text-align: right;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+/* ── Filter Bar ──────────────────────────────────── */
+.ins-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.ins-verdict-pills {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ins-pill {
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid #d1d5db;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: #f9fafb;
+  color: #374151;
+  transition: background 0.1s, color 0.1s;
+}
+
+.ins-pill--active.ins-pill-all      { background: #374151; color: #fff; border-color: #374151; }
+.ins-pill--active.ins-pill-good     { background: #16a34a; color: #fff; border-color: #16a34a; }
+.ins-pill--active.ins-pill-bad      { background: #d97706; color: #fff; border-color: #d97706; }
+.ins-pill--active.ins-pill-horrible { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+.ins-search {
+  flex: 1;
+  max-width: 240px;
+}
+
+/* ── Pagination ──────────────────────────────────── */
+.ins-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.ins-page-info { color: #6b7280; }
+.ins-page-num  { font-weight: 500; }
+
+.ins-page-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+}
