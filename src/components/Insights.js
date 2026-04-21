@@ -34,19 +34,16 @@ function computeInsights(rows) {
   return { compliancePct, complianceColor, topNoShows, worstDay, worstDayPct, avgStay };
 }
 
-// ── Compute monthly risk from rows ───────────────────────────────────────────
-function computeMonthlyRisk(rows, threshold = 0) {
+// ── Compute risk per person (one row per person) ─────────────────────────────
+function computePersonRisk(rows, threshold = 0) {
   if (!rows || rows.length === 0) return [];
   const map = {};
   rows.forEach(r => {
-    const month = r.parking_date?.slice(0, 7);
-    if (!month) return;
-    const key = `${r.zs_id}|${month}`;
-    if (!map[key]) map[key] = { zs_id: r.zs_id, name: r.name, month, good: 0, bad: 0, horrible: 0, total: 0 };
-    map[key].total++;
-    if (r.verdict === 'Good') map[key].good++;
-    else if (r.verdict === 'Bad') map[key].bad++;
-    else if (r.verdict === 'Horrible') map[key].horrible++;
+    if (!map[r.zs_id]) map[r.zs_id] = { zs_id: r.zs_id, name: r.name, good: 0, bad: 0, horrible: 0, total: 0 };
+    map[r.zs_id].total++;
+    if (r.verdict === 'Good') map[r.zs_id].good++;
+    else if (r.verdict === 'Bad') map[r.zs_id].bad++;
+    else if (r.verdict === 'Horrible') map[r.zs_id].horrible++;
   });
   return Object.values(map)
     .filter(r => r.horrible >= threshold)
@@ -250,15 +247,11 @@ export default function Insights() {
   } : null;
 
   const insights    = rows ? computeInsights(rows) : null;
-  const allMonthlyRisk = rows ? computeMonthlyRisk(rows, riskThreshold) : [];
-  const availableMonths = [...new Set(allMonthlyRisk.map(r => r.month))].sort();
-  const monthlyRisk = riskMonth === 'All' ? allMonthlyRisk : allMonthlyRisk.filter(r => r.month === riskMonth);
-
-  // Total horrible per person across ALL months (for the period total column)
-  const horribleTotalByPerson = {};
-  if (rows) rows.forEach(r => {
-    if (r.verdict === 'Horrible') horribleTotalByPerson[r.zs_id] = (horribleTotalByPerson[r.zs_id] || 0) + 1;
-  });
+  const availableMonths = rows ? [...new Set(rows.map(r => r.parking_date?.slice(0, 7)).filter(Boolean))].sort() : [];
+  const riskRows = rows
+    ? (riskMonth === 'All' ? rows : rows.filter(r => r.parking_date?.startsWith(riskMonth)))
+    : [];
+  const personRisk = computePersonRisk(riskRows, riskThreshold);
 
   const filteredRows = rows
     ? rows.filter(r => (verdictFilter === 'All' || r.verdict === verdictFilter) && r.name.toLowerCase().includes(nameSearch.toLowerCase()))
@@ -367,49 +360,45 @@ export default function Insights() {
             </div>
           )}
 
-          {/* ── Monthly Risk Panel ────────────────────────────── */}
-          {allMonthlyRisk.length > 0 && (
-            <div className="ins-card">
-              <div className="ins-results-header">
-                <h2 className="ins-card-title" style={{ margin: 0 }}>⚠️ At Risk of Ban (per month breakdown)</h2>
-                <div className="ins-date-row">
-                  <label className="ins-label">Min Horrible</label>
-                  <input
-                    type="number" min="0" max="20" className="ins-input" style={{ width: '60px' }}
-                    value={riskThreshold}
-                    onChange={e => setRiskThreshold(Math.max(0, parseInt(e.target.value) || 0))}
-                  />
-                  <label className="ins-label">Month</label>
-                  <select className="ins-input" value={riskMonth} onChange={e => setRiskMonth(e.target.value)}>
-                    <option value="All">All months</option>
-                    {availableMonths.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                </div>
+          {/* ── Risk Panel ───────────────────────────────────── */}
+          <div className="ins-card">
+            <div className="ins-results-header">
+              <h2 className="ins-card-title" style={{ margin: 0 }}>⚠️ At Risk of Ban</h2>
+              <div className="ins-date-row">
+                <label className="ins-label">Min Horrible</label>
+                <input
+                  type="number" min="0" max="20" className="ins-input" style={{ width: '60px' }}
+                  value={riskThreshold}
+                  onChange={e => setRiskThreshold(Math.max(0, parseInt(e.target.value) || 0))}
+                />
+                <label className="ins-label">Month</label>
+                <select className="ins-input" value={riskMonth} onChange={e => setRiskMonth(e.target.value)}>
+                  <option value="All">All months</option>
+                  {availableMonths.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
               </div>
-              {monthlyRisk.length === 0
-                ? <p className="ins-empty">No users at risk for this period.</p>
-                : <table className="ins-table">
-                    <thead>
-                      <tr><th>Name</th><th>ZS ID</th><th>Month</th><th>Horrible (month)</th><th>Bad</th><th>Good</th><th>Month Total</th><th>Period Total ⬆</th></tr>
-                    </thead>
-                    <tbody>
-                      {monthlyRisk.map((r, i) => (
-                        <tr key={i} className="ins-horrible">
-                          <td>{r.name}</td>
-                          <td className="ins-td-muted">{r.zs_id}</td>
-                          <td className="ins-td-muted">{r.month}</td>
-                          <td><span className="ins-badge ins-badge-horrible">{r.horrible}</span></td>
-                          <td className="ins-td-muted">{r.bad}</td>
-                          <td className="ins-td-muted">{r.good}</td>
-                          <td className="ins-td-muted">{r.total}</td>
-                          <td><strong>{horribleTotalByPerson[r.zs_id] || 0}</strong></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-              }
             </div>
-          )}
+            {personRisk.length === 0
+              ? <p className="ins-empty">No users match the current filters.</p>
+              : <table className="ins-table">
+                  <thead>
+                    <tr><th>Name</th><th>ZS ID</th><th>Horrible</th><th>Bad</th><th>Good</th><th>Total</th></tr>
+                  </thead>
+                  <tbody>
+                    {personRisk.map((r, i) => (
+                      <tr key={i} className="ins-horrible">
+                        <td>{r.name}</td>
+                        <td className="ins-td-muted">{r.zs_id}</td>
+                        <td><span className="ins-badge ins-badge-horrible">{r.horrible}</span></td>
+                        <td className="ins-td-muted">{r.bad}</td>
+                        <td className="ins-td-muted">{r.good}</td>
+                        <td className="ins-td-muted">{r.total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+            }
+          </div>
 
           {/* ── Results Table ─────────────────────────────────── */}
           <div className="ins-card">
