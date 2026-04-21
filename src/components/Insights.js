@@ -254,6 +254,12 @@ export default function Insights() {
   const availableMonths = [...new Set(allMonthlyRisk.map(r => r.month))].sort();
   const monthlyRisk = riskMonth === 'All' ? allMonthlyRisk : allMonthlyRisk.filter(r => r.month === riskMonth);
 
+  // Total horrible per person across ALL months (for the period total column)
+  const horribleTotalByPerson = {};
+  if (rows) rows.forEach(r => {
+    if (r.verdict === 'Horrible') horribleTotalByPerson[r.zs_id] = (horribleTotalByPerson[r.zs_id] || 0) + 1;
+  });
+
   const filteredRows = rows
     ? rows.filter(r => (verdictFilter === 'All' || r.verdict === verdictFilter) && r.name.toLowerCase().includes(nameSearch.toLowerCase()))
     : [];
@@ -384,7 +390,7 @@ export default function Insights() {
                 ? <p className="ins-empty">No users at risk for this period.</p>
                 : <table className="ins-table">
                     <thead>
-                      <tr><th>Name</th><th>ZS ID</th><th>Month</th><th>Horrible</th><th>Bad</th><th>Good</th><th>Total</th></tr>
+                      <tr><th>Name</th><th>ZS ID</th><th>Month</th><th>Horrible (month)</th><th>Bad</th><th>Good</th><th>Month Total</th><th>Period Total ⬆</th></tr>
                     </thead>
                     <tbody>
                       {monthlyRisk.map((r, i) => (
@@ -396,6 +402,7 @@ export default function Insights() {
                           <td className="ins-td-muted">{r.bad}</td>
                           <td className="ins-td-muted">{r.good}</td>
                           <td className="ins-td-muted">{r.total}</td>
+                          <td><strong>{horribleTotalByPerson[r.zs_id] || 0}</strong></td>
                         </tr>
                       ))}
                     </tbody>
