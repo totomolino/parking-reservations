@@ -91,6 +91,12 @@
   border: 1px solid #d1d5db;
 }
 
+.ins-btn-danger {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
 .ins-results-header {
   display: flex;
   justify-content: space-between;
@@ -363,4 +369,30 @@
 .ins-action-remove {
   background: #fee2e2;
   color: #dc2626;
+}
+
+.ins-action-save {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.ins-loaner-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.ins-loaner-inline-select {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+  max-width: 160px;
+}
+
+.ins-loaner-inline-assigned {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #16a34a;
+  font-weight: 500;
 }

@@ -91,12 +91,13 @@ export default function Insights() {
   const [fetching, setFetching]   = useState(false);
   const [verdictFilter, setVerdictFilter] = useState('All');
   const [nameSearch, setNameSearch]       = useState('');
-  const [page, setPage]           = useState(1);
+  const [page, setPage]                   = useState(1);
+  const [riskMonth, setRiskMonth]         = useState('All');
 
   // Loaner state
-  const [loanerActivity, setLoanerActivity]     = useState([]);
+  const [loanerActivity, setLoanerActivity]       = useState([]);
   const [loanerAssignments, setLoanerAssignments] = useState([]);
-  const [pendingAssign, setPendingAssign]         = useState({}); // {day|loaner_name: actual_zs_id}
+  const [pendingLoaner, setPendingLoaner]         = useState({}); // {zs_id|day: loaner_name}
 
   const fileRef = useRef();
 
@@ -199,19 +200,19 @@ export default function Insights() {
     }
   };
 
-  const handleAssignLoaner = async (day, loaner_name) => {
-    const key = `${day}|${loaner_name}`;
-    const actual_zs_id = pendingAssign[key];
-    if (!actual_zs_id) return;
+  const handleAssignLoaner = async (zs_id, day) => {
+    const key = `${zs_id}|${day}`;
+    const loaner_name = pendingLoaner[key];
+    if (!loaner_name) return;
     try {
-      const res = await api.post('/admin/loaner-assignments', { day, loaner_name, actual_zs_id });
-      const roster = rows ? rows.find(r => r.zs_id === actual_zs_id) : null;
+      const res = await api.post('/admin/loaner-assignments', { day, loaner_name, actual_zs_id: zs_id });
       const loaner = loanerActivity.find(l => l.loaner_name === loaner_name && l.day === day);
+      const person = rows?.find(r => r.zs_id === zs_id);
       setLoanerAssignments(prev => [
-        ...prev.filter(a => !(a.day === day && a.actual_zs_id === actual_zs_id)),
-        { id: res.data.id, day, loaner_name, actual_zs_id, actual_name: roster?.name || actual_zs_id, loaner_stay_hours: loaner?.stay_hours }
+        ...prev.filter(a => !(a.day === day && a.actual_zs_id === zs_id)),
+        { id: res.data.id, day, loaner_name, actual_zs_id: zs_id, actual_name: person?.name || zs_id, loaner_stay_hours: loaner?.stay_hours }
       ]);
-      setPendingAssign(prev => { const n = {...prev}; delete n[key]; return n; });
+      setPendingLoaner(prev => { const n = {...prev}; delete n[key]; return n; });
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to assign.');
     }
@@ -248,7 +249,9 @@ export default function Insights() {
   } : null;
 
   const insights    = rows ? computeInsights(rows) : null;
-  const monthlyRisk = rows ? computeMonthlyRisk(rows) : [];
+  const allMonthlyRisk = rows ? computeMonthlyRisk(rows) : [];
+  const availableMonths = [...new Set(allMonthlyRisk.map(r => r.month))].sort();
+  const monthlyRisk = riskMonth === 'All' ? allMonthlyRisk : allMonthlyRisk.filter(r => r.month === riskMonth);
 
   const filteredRows = rows
     ? rows.filter(r => (verdictFilter === 'All' || r.verdict === verdictFilter) && r.name.toLowerCase().includes(nameSearch.toLowerCase()))
@@ -258,19 +261,15 @@ export default function Insights() {
   const showingFrom = filteredRows.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const showingTo   = Math.min(page * PAGE_SIZE, filteredRows.length);
 
-  // Build loaner panel data: days with loaner activity
-  const horribleByDay = {};
-  if (rows) rows.filter(r => r.verdict === 'Horrible').forEach(r => {
-    if (!horribleByDay[r.parking_date]) horribleByDay[r.parking_date] = [];
-    horribleByDay[r.parking_date].push(r);
-  });
+  // Build loaner lookup: day → [loaner records]
   const loanerByDay = {};
   loanerActivity.forEach(l => {
     if (!loanerByDay[l.day]) loanerByDay[l.day] = [];
     loanerByDay[l.day].push(l);
   });
-  const assignedZsIds = new Set(loanerAssignments.map(a => `${a.day}|${a.actual_zs_id}`));
-  const daysWithLoaners = Object.keys(loanerByDay).filter(day => horribleByDay[day]?.length > 0).sort();
+  // assignment lookup: "zs_id|day" → assignment record
+  const assignmentByKey = {};
+  loanerAssignments.forEach(a => { assignmentByKey[`${a.actual_zs_id}|${a.day}`] = a; });
 
   return (
     <div className="insights-page">
@@ -288,6 +287,24 @@ export default function Insights() {
           </button>
         </div>
         {file && <p className="ins-file-name">Selected: {file.name}</p>}
+        <div style={{ marginTop: '1rem', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
+          <button
+            className="ins-btn ins-btn-danger"
+            onClick={async () => {
+              if (!window.confirm('This will delete ALL stored insights, loaner activity and assignments. Are you sure?')) return;
+              try {
+                await api.delete('/admin/insights-data');
+                setRows(null); setLoanerActivity([]); setLoanerAssignments([]);
+                setFromDate(''); setToDate('');
+                localStorage.removeItem('insights_range');
+              } catch (err) {
+                alert(err.response?.data?.message || 'Failed to clear data.');
+              }
+            }}
+          >
+            🗑 Clear All Data
+          </button>
+        </div>
       </div>
 
       {/* Date Range Fetch */}
@@ -344,101 +361,39 @@ export default function Insights() {
           )}
 
           {/* ── Monthly Risk Panel ────────────────────────────── */}
-          {monthlyRisk.length > 0 && (
+          {allMonthlyRisk.length > 0 && (
             <div className="ins-card">
-              <h2 className="ins-card-title">⚠️ At Risk of Ban ({HORRIBLE_THRESHOLD}+ Horrible in a month)</h2>
-              <table className="ins-table">
-                <thead>
-                  <tr><th>Name</th><th>ZS ID</th><th>Month</th><th>Horrible</th><th>Bad</th><th>Good</th><th>Total</th></tr>
-                </thead>
-                <tbody>
-                  {monthlyRisk.map((r, i) => (
-                    <tr key={i} className="ins-horrible">
-                      <td>{r.name}</td>
-                      <td className="ins-td-muted">{r.zs_id}</td>
-                      <td className="ins-td-muted">{r.month}</td>
-                      <td><span className="ins-badge ins-badge-horrible">{r.horrible}</span></td>
-                      <td className="ins-td-muted">{r.bad}</td>
-                      <td className="ins-td-muted">{r.good}</td>
-                      <td className="ins-td-muted">{r.total}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* ── Loaner Assignments Panel ──────────────────────── */}
-          {(daysWithLoaners.length > 0 || loanerAssignments.length > 0) && (
-            <div className="ins-card">
-              <h2 className="ins-card-title">🔑 Loaner Card Assignments</h2>
-              <p className="ins-hint">
-                These days have loaner card activity and people with no attendance match. Assign each loaner to the person who used it.
-              </p>
-
-              {/* Existing assignments */}
-              {loanerAssignments.length > 0 && (
-                <div className="ins-loaner-assigned">
-                  <h3 className="ins-loaner-subtitle">Saved Assignments</h3>
-                  <table className="ins-table">
+              <div className="ins-results-header">
+                <h2 className="ins-card-title" style={{ margin: 0 }}>⚠️ At Risk of Ban ({HORRIBLE_THRESHOLD}+ Horrible/month)</h2>
+                <div className="ins-date-row">
+                  <label className="ins-label">Month</label>
+                  <select className="ins-input" value={riskMonth} onChange={e => setRiskMonth(e.target.value)}>
+                    <option value="All">All months</option>
+                    {availableMonths.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+              </div>
+              {monthlyRisk.length === 0
+                ? <p className="ins-empty">No users at risk for this period.</p>
+                : <table className="ins-table">
                     <thead>
-                      <tr><th>Date</th><th>Loaner</th><th>Stay</th><th>Assigned To</th><th></th></tr>
+                      <tr><th>Name</th><th>ZS ID</th><th>Month</th><th>Horrible</th><th>Bad</th><th>Good</th><th>Total</th></tr>
                     </thead>
                     <tbody>
-                      {loanerAssignments.map(a => (
-                        <tr key={a.id}>
-                          <td className="ins-td-muted">{a.day}</td>
-                          <td>{a.loaner_name}</td>
-                          <td className="ins-td-muted">{a.loaner_stay_hours != null ? `${Number(a.loaner_stay_hours).toFixed(2)}h` : '—'}</td>
-                          <td>{a.actual_name}</td>
-                          <td>
-                            <button className="ins-action-btn ins-action-remove" onClick={() => handleRemoveAssignment(a.id)}>✕</button>
-                          </td>
+                      {monthlyRisk.map((r, i) => (
+                        <tr key={i} className="ins-horrible">
+                          <td>{r.name}</td>
+                          <td className="ins-td-muted">{r.zs_id}</td>
+                          <td className="ins-td-muted">{r.month}</td>
+                          <td><span className="ins-badge ins-badge-horrible">{r.horrible}</span></td>
+                          <td className="ins-td-muted">{r.bad}</td>
+                          <td className="ins-td-muted">{r.good}</td>
+                          <td className="ins-td-muted">{r.total}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                </div>
-              )}
-
-              {/* Unassigned days */}
-              {daysWithLoaners.map(day => {
-                const dayLoaners = loanerByDay[day] || [];
-                const dayHorribles = (horribleByDay[day] || []).filter(r => !assignedZsIds.has(`${day}|${r.zs_id}`));
-                if (dayHorribles.length === 0) return null;
-                return (
-                  <div key={day} className="ins-loaner-day">
-                    <div className="ins-loaner-day-header">{day}</div>
-                    {dayLoaners.map(loaner => {
-                      const key = `${day}|${loaner.loaner_name}`;
-                      return (
-                        <div key={key} className="ins-loaner-row">
-                          <div className="ins-loaner-card-name">
-                            {loaner.loaner_name}
-                            <span className="ins-loaner-hours">{Number(loaner.stay_hours).toFixed(2)}h</span>
-                          </div>
-                          <span className="ins-loaner-arrow">→</span>
-                          <select
-                            className="ins-input ins-loaner-select"
-                            value={pendingAssign[key] || ''}
-                            onChange={e => setPendingAssign(prev => ({ ...prev, [key]: e.target.value }))}
-                          >
-                            <option value="">— select person —</option>
-                            {dayHorribles.map(r => (
-                              <option key={r.zs_id} value={r.zs_id}>{r.name}</option>
-                            ))}
-                          </select>
-                          <button
-                            className="ins-btn ins-btn-primary ins-loaner-save"
-                            onClick={() => handleAssignLoaner(day, loaner.loaner_name)}
-                            disabled={!pendingAssign[key]}
-                          >Save</button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
+              }
             </div>
           )}
 
@@ -467,11 +422,15 @@ export default function Insights() {
               : <>
                   <table className="ins-table">
                     <thead>
-                      <tr><th>Name</th><th>ZS ID</th><th>Date</th><th>Entry</th><th>Leave</th><th>Hours</th><th>Verdict</th></tr>
+                      <tr><th>Name</th><th>ZS ID</th><th>Date</th><th>Entry</th><th>Leave</th><th>Hours</th><th>Verdict</th><th>Loaner</th></tr>
                     </thead>
                     <tbody>
                       {pagedRows.map((row, i) => {
                         const meta = VERDICT_META[row.verdict] || VERDICT_META.Horrible;
+                        const isHorrible = row.verdict === 'Horrible';
+                        const dayLoaners = loanerByDay[row.parking_date] || [];
+                        const assignKey = `${row.zs_id}|${row.parking_date}`;
+                        const existingAssign = assignmentByKey[assignKey];
                         return (
                           <tr key={i} className={meta.cls}>
                             <td>{row.name}</td>
@@ -481,6 +440,32 @@ export default function Insights() {
                             <td className="ins-td-muted">{row.leave_time || '—'}</td>
                             <td className="ins-td-muted">{row.stay_hours != null ? Number(row.stay_hours).toFixed(2) : '—'}</td>
                             <td><span className={`ins-badge ins-badge-${(row.verdict || '').toLowerCase()}`}>{row.verdict}</span></td>
+                            <td>
+                              {isHorrible && existingAssign ? (
+                                <div className="ins-loaner-inline-assigned">
+                                  <span>{existingAssign.loaner_name}</span>
+                                  <button className="ins-action-btn ins-action-remove" onClick={() => handleRemoveAssignment(existingAssign.id)}>✕</button>
+                                </div>
+                              ) : isHorrible && dayLoaners.length > 0 ? (
+                                <div className="ins-loaner-inline">
+                                  <select
+                                    className="ins-input ins-loaner-inline-select"
+                                    value={pendingLoaner[assignKey] || ''}
+                                    onChange={e => setPendingLoaner(prev => ({ ...prev, [assignKey]: e.target.value }))}
+                                  >
+                                    <option value="">— loaner —</option>
+                                    {dayLoaners.map(l => (
+                                      <option key={l.loaner_name} value={l.loaner_name}>
+                                        {l.loaner_name} ({Number(l.stay_hours).toFixed(1)}h)
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {pendingLoaner[assignKey] && (
+                                    <button className="ins-action-btn ins-action-save" onClick={() => handleAssignLoaner(row.zs_id, row.parking_date)}>✓</button>
+                                  )}
+                                </div>
+                              ) : null}
+                            </td>
                           </tr>
                         );
                       })}
