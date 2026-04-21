@@ -246,10 +246,27 @@ export default function Insights() {
     horrible: rows.filter(r => r.verdict === 'Horrible').length,
   } : null;
 
-  const insights    = rows ? computeInsights(rows) : null;
+  // Apply loaner corrections: Horrible rows with an assignment become Good/Bad
+  const effectiveRows = rows ? rows.map(r => {
+    const a = assignmentByKey[`${r.zs_id}|${r.parking_date}`];
+    if (r.verdict === 'Horrible' && a) {
+      const corrected = (a.loaner_stay_hours != null && a.loaner_stay_hours >= 6.0) ? 'Good' : 'Bad';
+      return { ...r, verdict: corrected, stay_hours: a.loaner_stay_hours };
+    }
+    return r;
+  }) : null;
+
+  const insights    = effectiveRows ? computeInsights(effectiveRows) : null;
+  const effectiveStats = effectiveRows ? {
+    total:    effectiveRows.length,
+    good:     effectiveRows.filter(r => r.verdict === 'Good').length,
+    bad:      effectiveRows.filter(r => r.verdict === 'Bad').length,
+    horrible: effectiveRows.filter(r => r.verdict === 'Horrible').length,
+  } : null;
+
   const availableMonths = rows ? [...new Set(rows.map(r => r.parking_date?.slice(0, 7)).filter(Boolean))].sort() : [];
-  const riskRows = rows
-    ? (riskMonth === 'All' ? rows : rows.filter(r => r.parking_date?.startsWith(riskMonth)))
+  const riskRows = effectiveRows
+    ? (riskMonth === 'All' ? effectiveRows : effectiveRows.filter(r => r.parking_date?.startsWith(riskMonth)))
     : [];
   const personRisk = computePersonRisk(riskRows, riskThreshold);
 
@@ -331,7 +348,7 @@ export default function Insights() {
               <div className="ins-insight-card">
                 <div className="ins-insight-label">Compliance Rate</div>
                 <div className="ins-insight-value" style={{ color: insights.complianceColor }}>{insights.compliancePct}%</div>
-                <div className="ins-insight-sub">{stats.good} Good out of {stats.total}</div>
+                <div className="ins-insight-sub">{effectiveStats.good} Good out of {effectiveStats.total}</div>
               </div>
               <div className="ins-insight-card ins-insight-card--wide">
                 <div className="ins-insight-label">Top No-Shows (all time total)</div>
@@ -407,10 +424,15 @@ export default function Insights() {
               <button className="ins-btn ins-btn-ghost" onClick={handleDownloadCSV}>⬇ Download CSV</button>
             </div>
             <div className="ins-stats">
-              <div className="ins-stat ins-stat-total">Total: {stats.total}</div>
-              <div className="ins-stat ins-stat-good">Good: {stats.good}</div>
-              <div className="ins-stat ins-stat-bad">Bad: {stats.bad}</div>
-              <div className="ins-stat ins-stat-horrible">Horrible: {stats.horrible}</div>
+              <div className="ins-stat ins-stat-total">Total: {effectiveStats.total}</div>
+              <div className="ins-stat ins-stat-good">Good: {effectiveStats.good}</div>
+              <div className="ins-stat ins-stat-bad">Bad: {effectiveStats.bad}</div>
+              <div className="ins-stat ins-stat-horrible">Horrible: {effectiveStats.horrible}</div>
+              {loanerAssignments.length > 0 && (
+                <div className="ins-stat" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                  🔑 {loanerAssignments.length} loaner{loanerAssignments.length > 1 ? 's' : ''} assigned
+                </div>
+              )}
             </div>
             <div className="ins-filter-bar">
               <div className="ins-verdict-pills">
@@ -446,8 +468,8 @@ export default function Insights() {
                             <td>
                               {isHorrible && existingAssign ? (
                                 <div className="ins-loaner-inline-assigned">
-                                  <span>{existingAssign.loaner_name}</span>
-                                  <button className="ins-action-btn ins-action-remove" onClick={() => handleRemoveAssignment(existingAssign.id)}>✕</button>
+                                  <span>🔑 {existingAssign.loaner_name}</span>
+                                  <button className="ins-action-btn ins-action-remove" title="Remove loaner assignment" onClick={() => handleRemoveAssignment(existingAssign.id)}>✕ undo</button>
                                 </div>
                               ) : isHorrible && dayLoaners.length > 0 ? (
                                 <div className="ins-loaner-inline">
