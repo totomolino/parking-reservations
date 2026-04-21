@@ -6,7 +6,7 @@ import './Insights.css';
 const VERDICT_META = { Good: { cls: 'ins-good' }, Bad: { cls: 'ins-bad' }, Horrible: { cls: 'ins-horrible' } };
 const PAGE_SIZE = 25;
 const VERDICTS = ['All', 'Good', 'Bad', 'Horrible'];
-const HORRIBLE_THRESHOLD = 3;
+const DEFAULT_HORRIBLE_THRESHOLD = 3;
 
 // ── Compute insight cards from rows ──────────────────────────────────────────
 function computeInsights(rows) {
@@ -35,11 +35,11 @@ function computeInsights(rows) {
 }
 
 // ── Compute monthly risk from rows ───────────────────────────────────────────
-function computeMonthlyRisk(rows) {
+function computeMonthlyRisk(rows, threshold = 0) {
   if (!rows || rows.length === 0) return [];
   const map = {};
   rows.forEach(r => {
-    const month = r.parking_date?.slice(0, 7); // YYYY-MM
+    const month = r.parking_date?.slice(0, 7);
     if (!month) return;
     const key = `${r.zs_id}|${month}`;
     if (!map[key]) map[key] = { zs_id: r.zs_id, name: r.name, month, good: 0, bad: 0, horrible: 0, total: 0 };
@@ -49,7 +49,7 @@ function computeMonthlyRisk(rows) {
     else if (r.verdict === 'Horrible') map[key].horrible++;
   });
   return Object.values(map)
-    .filter(r => r.horrible >= HORRIBLE_THRESHOLD)
+    .filter(r => r.horrible >= threshold)
     .sort((a, b) => b.horrible - a.horrible || a.name.localeCompare(b.name));
 }
 
@@ -92,7 +92,8 @@ export default function Insights() {
   const [verdictFilter, setVerdictFilter] = useState('All');
   const [nameSearch, setNameSearch]       = useState('');
   const [page, setPage]                   = useState(1);
-  const [riskMonth, setRiskMonth]         = useState('All');
+  const [riskMonth, setRiskMonth]           = useState('All');
+  const [riskThreshold, setRiskThreshold]   = useState(DEFAULT_HORRIBLE_THRESHOLD);
 
   // Loaner state
   const [loanerActivity, setLoanerActivity]       = useState([]);
@@ -249,7 +250,7 @@ export default function Insights() {
   } : null;
 
   const insights    = rows ? computeInsights(rows) : null;
-  const allMonthlyRisk = rows ? computeMonthlyRisk(rows) : [];
+  const allMonthlyRisk = rows ? computeMonthlyRisk(rows, riskThreshold) : [];
   const availableMonths = [...new Set(allMonthlyRisk.map(r => r.month))].sort();
   const monthlyRisk = riskMonth === 'All' ? allMonthlyRisk : allMonthlyRisk.filter(r => r.month === riskMonth);
 
@@ -334,7 +335,7 @@ export default function Insights() {
                 <div className="ins-insight-sub">{stats.good} Good out of {stats.total}</div>
               </div>
               <div className="ins-insight-card ins-insight-card--wide">
-                <div className="ins-insight-label">Top No-Shows</div>
+                <div className="ins-insight-label">Top No-Shows (all time total)</div>
                 {insights.topNoShows.length === 0
                   ? <div className="ins-insight-sub">No no-shows 🎉</div>
                   : <table className="ins-mini-table"><tbody>
@@ -364,8 +365,14 @@ export default function Insights() {
           {allMonthlyRisk.length > 0 && (
             <div className="ins-card">
               <div className="ins-results-header">
-                <h2 className="ins-card-title" style={{ margin: 0 }}>⚠️ At Risk of Ban ({HORRIBLE_THRESHOLD}+ Horrible/month)</h2>
+                <h2 className="ins-card-title" style={{ margin: 0 }}>⚠️ At Risk of Ban (per month breakdown)</h2>
                 <div className="ins-date-row">
+                  <label className="ins-label">Min Horrible</label>
+                  <input
+                    type="number" min="0" max="20" className="ins-input" style={{ width: '60px' }}
+                    value={riskThreshold}
+                    onChange={e => setRiskThreshold(Math.max(0, parseInt(e.target.value) || 0))}
+                  />
                   <label className="ins-label">Month</label>
                   <select className="ins-input" value={riskMonth} onChange={e => setRiskMonth(e.target.value)}>
                     <option value="All">All months</option>
