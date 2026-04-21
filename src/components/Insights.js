@@ -238,13 +238,15 @@ export default function Insights() {
     URL.revokeObjectURL(url);
   };
 
-  // Derived
-  const stats = rows ? {
-    total: rows.length,
-    good: rows.filter(r => r.verdict === 'Good').length,
-    bad: rows.filter(r => r.verdict === 'Bad').length,
-    horrible: rows.filter(r => r.verdict === 'Horrible').length,
-  } : null;
+  // Build loaner lookup: day → [loaner records]
+  const loanerByDay = {};
+  loanerActivity.forEach(l => {
+    if (!loanerByDay[l.day]) loanerByDay[l.day] = [];
+    loanerByDay[l.day].push(l);
+  });
+  // assignment lookup: "zs_id|day" → assignment record (must be before effectiveRows)
+  const assignmentByKey = {};
+  loanerAssignments.forEach(a => { assignmentByKey[`${a.actual_zs_id}|${a.day}`] = a; });
 
   // Apply loaner corrections: Horrible rows with an assignment become Good/Bad
   const effectiveRows = rows ? rows.map(r => {
@@ -277,16 +279,6 @@ export default function Insights() {
   const pagedRows   = filteredRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const showingFrom = filteredRows.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const showingTo   = Math.min(page * PAGE_SIZE, filteredRows.length);
-
-  // Build loaner lookup: day → [loaner records]
-  const loanerByDay = {};
-  loanerActivity.forEach(l => {
-    if (!loanerByDay[l.day]) loanerByDay[l.day] = [];
-    loanerByDay[l.day].push(l);
-  });
-  // assignment lookup: "zs_id|day" → assignment record
-  const assignmentByKey = {};
-  loanerAssignments.forEach(a => { assignmentByKey[`${a.actual_zs_id}|${a.day}`] = a; });
 
   return (
     <div className="insights-page">
