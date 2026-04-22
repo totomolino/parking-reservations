@@ -156,7 +156,20 @@
 
 .ins-table td {
   padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #f3f4f6;
+}
+
+.ins-table td:last-child {
+  border-right: none;
+}
+
+.ins-table th {
+  border-right: 1px solid #e5e7eb;
+}
+
+.ins-table th:last-child {
+  border-right: none;
 }
 
 .ins-td-muted { color: #6b7280; }
@@ -386,6 +399,42 @@
   padding: 0.2rem 0.4rem;
   font-size: 0.75rem;
   max-width: 160px;
+}
+
+.ins-td-loaner {
+  min-width: 180px;
+}
+
+.ins-no-loaner {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.ins-loaner-select-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.ins-loaner-dropdown {
+  appearance: none;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  padding: 0.3rem 1.8rem 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  color: #0369a1;
+  font-weight: 500;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230369a1' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  max-width: 180px;
+}
+
+.ins-loaner-dropdown:hover {
+  background-color: #e0f2fe;
+  border-color: #7dd3fc;
 }
 
 .ins-loaner-inline-assigned {

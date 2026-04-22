@@ -457,7 +457,7 @@ export default function Insights() {
                             <td className="ins-td-muted">{row.leave_time || '—'}</td>
                             <td className="ins-td-muted">{row.stay_hours != null ? Number(row.stay_hours).toFixed(2) : '—'}</td>
                             <td><span className={`ins-badge ins-badge-${(row.verdict || '').toLowerCase()}`}>{row.verdict}</span></td>
-                            <td>
+                            <td className="ins-td-loaner">
                               {isHorrible && existingAssign ? (
                                 <div className="ins-loaner-inline-assigned">
                                   <span>🔑 {existingAssign.loaner_name}</span>
@@ -465,22 +465,26 @@ export default function Insights() {
                                 </div>
                               ) : isHorrible && dayLoaners.length > 0 ? (
                                 <div className="ins-loaner-inline">
-                                  <select
-                                    className="ins-input ins-loaner-inline-select"
-                                    value={pendingLoaner[assignKey] || ''}
-                                    onChange={e => setPendingLoaner(prev => ({ ...prev, [assignKey]: e.target.value }))}
-                                  >
-                                    <option value="">— loaner —</option>
-                                    {dayLoaners.map(l => (
-                                      <option key={l.loaner_name} value={l.loaner_name}>
-                                        {l.loaner_name} ({Number(l.stay_hours).toFixed(1)}h)
-                                      </option>
-                                    ))}
-                                  </select>
+                                  <div className="ins-loaner-select-wrap">
+                                    <select
+                                      className="ins-loaner-dropdown"
+                                      value={pendingLoaner[assignKey] || ''}
+                                      onChange={e => setPendingLoaner(prev => ({ ...prev, [assignKey]: e.target.value }))}
+                                    >
+                                      <option value="">🔑 Assign loaner…</option>
+                                      {dayLoaners.map(l => (
+                                        <option key={l.loaner_name} value={l.loaner_name}>
+                                          {l.loaner_name} · {Number(l.stay_hours).toFixed(1)}h
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
                                   {pendingLoaner[assignKey] && (
                                     <button className="ins-action-btn ins-action-save" onClick={() => handleAssignLoaner(row.zs_id, row.parking_date)}>✓</button>
                                   )}
                                 </div>
+                              ) : isHorrible ? (
+                                <span className="ins-no-loaner">No loaner requested this day</span>
                               ) : null}
                             </td>
                           </tr>
