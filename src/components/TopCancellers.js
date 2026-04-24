@@ -23,6 +23,10 @@ export default function TopCancellers() {
   const [blLoading, setBlLoading]         = useState(true);
   const [unbanning, setUnbanning]         = useState({});
 
+  // Flagged
+  const [flagged, setFlagged]             = useState({ flagged: [], to_be_flagged: [] });
+  const [flaggedLoading, setFlaggedLoading] = useState(true);
+
   // ── Cancellations ──────────────────────────────────────────────────────────
   const fetchTopData = async () => {
     try {
@@ -45,6 +49,7 @@ export default function TopCancellers() {
       const r = await api.post('/penalize');
       setPenalizeResult(r.data);
       fetchTopData();
+      fetchFlagged();
     } catch (err) {
       setPenalizeResult({ error: err.response?.data?.message || 'Failed to run penalty.' });
     } finally {
@@ -104,11 +109,25 @@ export default function TopCancellers() {
     }
   };
 
+  // ── Flagged ────────────────────────────────────────────────────────────────
+  const fetchFlagged = useCallback(async () => {
+    try {
+      setFlaggedLoading(true);
+      const res = await api.get('/admin/compliance/flagged');
+      setFlagged(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFlaggedLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchTopData();
     fetchNoShows();
     fetchBlacklist();
-  }, [fetchNoShows, fetchBlacklist]);
+    fetchFlagged();
+  }, [fetchNoShows, fetchBlacklist, fetchFlagged]);
 
   const filteredNoShows = noShows.filter(u => u.no_show_count >= nsThreshold);
 
@@ -118,79 +137,7 @@ export default function TopCancellers() {
   return (
     <div className="cancellations-page">
 
-      {/* ── SECTION 1: Cancellations ──────────────────────────────────────── */}
-      <div className="ci-card">
-        <h2 className="ci-card-title">Cancellations — Top Cancellers (Last 3 Months)</h2>
-        <table className="ci-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th className="tooltip-container">Total 🛈<span className="tooltip-text">Total cancellations in the last 3 months</span></th>
-              <th className="tooltip-container">#Bad 🛈<span className="tooltip-text">Cancellations made too close to the reserved date (penalized)</span></th>
-              <th className="tooltip-container">#Good 🛈<span className="tooltip-text">Cancellations made with enough advance notice (not penalized)</span></th>
-              <th className="tooltip-container">Assigned 🛈<span className="tooltip-text">Total parking slots assigned in the period</span></th>
-              <th className="tooltip-container">Rate 🛈<span className="tooltip-text">Cancellations as a percentage of assigned slots</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.slice(0, 30).map((c) => (
-              <tr key={c.user_id}>
-                <td>{c.user_name}</td>
-                <td className="col-center">{c.total_cancellations}</td>
-                <td className="col-center">{c.total_bad}</td>
-                <td className="col-center">{c.total_good}</td>
-                <td className="col-center">{c.total_assigned_slots}</td>
-                <td className="col-center">{c.cancellation_rate_pct}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="cancel-actions">
-          <button className="ci-btn ci-btn-danger" onClick={handlePenalize} disabled={penalizing}>
-            {penalizing ? 'Processing…' : '⚠️ Run Monthly Penalty'}
-          </button>
-        </div>
-
-        {penalizeResult && (
-          <div className={`ci-result-box ${penalizeResult.error ? 'ci-result-err' : 'ci-result-ok'}`}>
-            {penalizeResult.error ? (
-              <p>{penalizeResult.error}</p>
-            ) : (
-              <>
-                <p style={{ marginBottom: '1rem' }}>
-                  ✅ Penalty run complete. Max allowed next month: {penalizeResult.max_allowed_cancellations_next_month}
-                </p>
-                {penalizeResult.penalized_users?.length > 0 && (
-                  <div style={{ marginBottom: '1rem' }}>
-                    <strong style={{ display: 'block', marginBottom: '0.5rem' }}>Penalized ({penalizeResult.penalized_users.length}):</strong>
-                    <ul className="cancel-result-list">
-                      {penalizeResult.penalized_users.map(u => (
-                        <li key={u.user_id}>{u.name} — {u.cancellations} cancellations → score {u.new_score}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {penalizeResult.depenalized_users?.length > 0 && (
-                  <div>
-                    <strong style={{ display: 'block', marginBottom: '0.5rem' }}>De-penalized ({penalizeResult.depenalized_users.length}):</strong>
-                    <ul className="cancel-result-list">
-                      {penalizeResult.depenalized_users.map(u => (
-                        <li key={u.user_id}>{u.name} → score {u.new_score}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      <MonthlyCancellations />
-      <LastCancellations />
-
-      {/* ── SECTION 2: No-shows ───────────────────────────────────────────── */}
+      {/* ── SECTION 1: No-shows ───────────────────────────────────────────── */}
       <div className="ci-card">
         <h2 className="ci-card-title">No-shows</h2>
         <p className="ci-subtitle">
@@ -230,7 +177,7 @@ export default function TopCancellers() {
                       <span className="compliance-badge compliance-badge-noshow">{u.no_show_count}</span>
                     </td>
                     <td className="col-center">
-                      {u.cancellation_count >= 2
+                      {Number(u.cancellation_count) >= 2
                         ? <span className="compliance-badge compliance-badge-warn">⚠️ {u.cancellation_count}</span>
                         : <span className="ci-muted">—</span>}
                     </td>
@@ -255,7 +202,7 @@ export default function TopCancellers() {
         )}
       </div>
 
-      {/* ── SECTION 3: Blacklist ──────────────────────────────────────────── */}
+      {/* ── SECTION 2: Blacklist ──────────────────────────────────────────── */}
       <div className="ci-card">
         <h2 className="ci-card-title">Blacklist</h2>
         <p className="ci-subtitle">Users completely blocked from the bot. Only admins can unban.</p>
@@ -293,6 +240,236 @@ export default function TopCancellers() {
           )
         )}
       </div>
+
+      {/* ── SECTION 3: Penalization Status ───────────────────────────────── */}
+      <div className="ci-card">
+        <h2 className="ci-card-title">Penalization Status</h2>
+
+        <div className="compliance-penalize-header">
+          <div>
+            <p className="ci-subtitle" style={{ marginBottom: '0.25rem' }}>
+              Preview of what happens when you run the monthly penalty.
+            </p>
+            <p className="compliance-remind">
+              📅 Run on the <strong>1st of each month</strong> — penalizes last month's offenders and releases users who had a clean month.
+            </p>
+          </div>
+          <div className="compliance-penalize-actions">
+            <button className="ci-btn ci-btn-danger" onClick={handlePenalize} disabled={penalizing}>
+              {penalizing ? 'Processing…' : '⚠️ Run Monthly Penalty'}
+            </button>
+          </div>
+        </div>
+
+        {penalizeResult && (
+          <div className={`ci-result-box ${penalizeResult.error ? 'ci-result-err' : 'ci-result-ok'}`} style={{ marginBottom: '1rem' }}>
+            {penalizeResult.error ? (
+              <p>{penalizeResult.error}</p>
+            ) : (
+              <>
+                <p style={{ marginBottom: '0.75rem' }}>
+                  ✅ Done. Max allowed next month: <strong>{penalizeResult.max_allowed_cancellations_next_month}</strong>
+                </p>
+                {penalizeResult.penalized_users?.length > 0 && (
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <strong>Penalized ({penalizeResult.penalized_users.length}):</strong>
+                    <ul className="cancel-result-list">
+                      {penalizeResult.penalized_users.map(u => (
+                        <li key={u.user_id}>{u.name} — {u.cancellations} cancellations → score {u.new_score}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {penalizeResult.depenalized_users?.length > 0 && (
+                  <div>
+                    <strong>De-penalized ({penalizeResult.depenalized_users.length}):</strong>
+                    <ul className="cancel-result-list">
+                      {penalizeResult.depenalized_users.map(u => (
+                        <li key={u.user_id}>{u.name} → score {u.new_score}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {flaggedLoading ? <Loader text="Loading…" /> : (
+          <div className="compliance-flagged-grid">
+
+            <div>
+              <h3 className="compliance-flagged-subtitle">
+                Will be penalized ({flagged.to_be_flagged?.length ?? 0})
+                <span className="compliance-flagged-hint"> — exceeded limit last month</span>
+              </h3>
+              {!flagged.to_be_flagged?.length ? (
+                <p className="ci-empty">None.</p>
+              ) : (
+                <table className="ci-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th className="col-center">Cancellations</th>
+                      <th className="col-center">Score now → after</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {flagged.to_be_flagged.map(u => (
+                      <tr key={u.user_id}>
+                        <td>{u.name}</td>
+                        <td className="col-center">
+                          <span className="compliance-badge compliance-badge-noshow">{u.cancellation_count}</span>
+                        </td>
+                        <td className="col-center">
+                          <span className="compliance-score-arrow">
+                            <span className="compliance-badge compliance-badge-ok">{flagged.max_score}</span>
+                            {' → '}
+                            <span className="compliance-badge compliance-badge-warn">{u.possible_new_score}</span>
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div>
+              <h3 className="compliance-flagged-subtitle">
+                Will be released ({flagged.to_be_depenalized?.length ?? 0})
+                <span className="compliance-flagged-hint"> — flagged + clean last month</span>
+              </h3>
+              {!flagged.to_be_depenalized?.length ? (
+                <p className="ci-empty">None.</p>
+              ) : (
+                <table className="ci-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th className="col-center">Score now → after</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {flagged.to_be_depenalized.map(u => (
+                      <tr key={u.user_id}>
+                        <td>{u.name}</td>
+                        <td className="col-center">
+                          <span className="compliance-score-arrow">
+                            <span className="compliance-badge compliance-badge-warn">
+                              {flagged.flagged.find(f => f.user_id === u.user_id)?.score ?? '?'}
+                            </span>
+                            {' → '}
+                            <span className="compliance-badge compliance-badge-ok">{u.future_score}</span>
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {/* Flagged users NOT being released this run */}
+              {(() => {
+                const releaseIds = new Set((flagged.to_be_depenalized ?? []).map(u => u.user_id));
+                const staying = (flagged.flagged ?? []).filter(u => !releaseIds.has(u.user_id));
+                if (!staying.length) return null;
+                return (
+                  <div style={{ marginTop: '1rem' }}>
+                    <h3 className="compliance-flagged-subtitle">
+                      Still penalized ({staying.length})
+                      <span className="compliance-flagged-hint"> — had cancellations this or last month</span>
+                    </h3>
+                    <table className="ci-table">
+                      <thead>
+                        <tr><th>User</th><th className="col-center">Score</th></tr>
+                      </thead>
+                      <tbody>
+                        {staying.map(u => (
+                          <tr key={u.user_id}>
+                            <td>{u.name}</td>
+                            <td className="col-center">
+                              <span className="compliance-badge compliance-badge-warn">{u.score}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* ── SECTION 4: Cancellations ──────────────────────────────────────── */}
+      <div className="ci-card">
+        <h2 className="ci-card-title">Cancellations — Top Cancellers (Last 3 Months)</h2>
+        <table className="ci-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th className="tooltip-container">Total 🛈<span className="tooltip-text">Total cancellations in the last 3 months</span></th>
+              <th className="tooltip-container">#Bad 🛈<span className="tooltip-text">Cancellations made too close to the reserved date (penalized)</span></th>
+              <th className="tooltip-container">#Good 🛈<span className="tooltip-text">Cancellations made with enough advance notice (not penalized)</span></th>
+              <th className="tooltip-container">Assigned 🛈<span className="tooltip-text">Total parking slots assigned in the period</span></th>
+              <th className="tooltip-container">Rate 🛈<span className="tooltip-text">Cancellations as a percentage of assigned slots</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.slice(0, 30).map((c) => (
+              <tr key={c.user_id}>
+                <td>{c.user_name}</td>
+                <td className="col-center">{c.total_cancellations}</td>
+                <td className="col-center">{c.total_bad}</td>
+                <td className="col-center">{c.total_good}</td>
+                <td className="col-center">{c.total_assigned_slots}</td>
+                <td className="col-center">{c.cancellation_rate_pct}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+
+        {penalizeResult && (
+          <div className={`ci-result-box ${penalizeResult.error ? 'ci-result-err' : 'ci-result-ok'}`}>
+            {penalizeResult.error ? (
+              <p>{penalizeResult.error}</p>
+            ) : (
+              <>
+                <p style={{ marginBottom: '1rem' }}>
+                  ✅ Penalty run complete. Max allowed next month: {penalizeResult.max_allowed_cancellations_next_month}
+                </p>
+                {penalizeResult.penalized_users?.length > 0 && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <strong style={{ display: 'block', marginBottom: '0.5rem' }}>Penalized ({penalizeResult.penalized_users.length}):</strong>
+                    <ul className="cancel-result-list">
+                      {penalizeResult.penalized_users.map(u => (
+                        <li key={u.user_id}>{u.name} — {u.cancellations} cancellations → score {u.new_score}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {penalizeResult.depenalized_users?.length > 0 && (
+                  <div>
+                    <strong style={{ display: 'block', marginBottom: '0.5rem' }}>De-penalized ({penalizeResult.depenalized_users.length}):</strong>
+                    <ul className="cancel-result-list">
+                      {penalizeResult.depenalized_users.map(u => (
+                        <li key={u.user_id}>{u.name} → score {u.new_score}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      <MonthlyCancellations />
+      <LastCancellations />
 
     </div>
   );

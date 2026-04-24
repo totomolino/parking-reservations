@@ -79,3 +79,57 @@
   font-size: 0.78rem;
 }
 
+/* ── Flagged grid ────────────────────────────────── */
+.compliance-flagged-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .compliance-flagged-grid { grid-template-columns: 1fr; }
+}
+
+.compliance-flagged-subtitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem;
+}
+
+.compliance-flagged-hint {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 0.78rem;
+}
+
+/* ── Penalize header ─────────────────────────────── */
+.compliance-penalize-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.compliance-penalize-actions {
+  flex-shrink: 0;
+}
+
+.compliance-remind {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── Score arrow ─────────────────────────────────── */
+.compliance-score-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.compliance-badge-ok { background: #dcfce7; color: #16a34a; }
+
