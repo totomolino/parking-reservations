@@ -28,3 +28,54 @@
 .cancel-result-list li {
   margin-bottom: 0.25rem;
 }
+
+/* ── Compliance: threshold row ──────────────────────── */
+.compliance-threshold-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.compliance-threshold-input {
+  width: 60px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* ── Compliance: badges ─────────────────────────────── */
+.compliance-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.compliance-badge-noshow { background: #fee2e2; color: #dc2626; }
+.compliance-badge-warn   { background: #fef9c3; color: #d97706; }
+.compliance-badge-banned { background: #1e293b; color: #f8fafc; }
+
+/* ── Compliance: banned row highlight ───────────────── */
+.compliance-row-banned td { background: #f8fafc; color: #94a3b8; }
+
+/* ── Misc ───────────────────────────────────────────── */
+.ci-subtitle {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: -0.5rem 0 1rem;
+}
+
+.ci-muted { color: #9ca3af; font-size: 0.82rem; }
+.ci-empty { color: #6b7280; font-size: 0.875rem; }
+.ci-label { font-size: 0.875rem; font-weight: 500; }
+
+.ci-btn-sm {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+}
+

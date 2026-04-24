@@ -23,7 +23,7 @@ function App() {
             <ul className="nav-links">
               <li><NavLink to="/" end>Home</NavLink></li>
               <li><NavLink to="/assignments">Assignments</NavLink></li>
-              <li><NavLink to="/top_cancellers">Cancellations</NavLink></li>
+              <li><NavLink to="/top_cancellers">Compliance</NavLink></li>
               <li><NavLink to="/roster">Roster</NavLink></li>
               <li><NavLink to="/manage">Manage</NavLink></li>
               <li><NavLink to="/checkin">Check-in</NavLink></li>
