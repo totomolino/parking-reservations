@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import api from '../api';
 import Loader from './Loader';
 import AssignModal from './AssignModal';
@@ -20,6 +21,15 @@ export default function Manage() {
   const [releaseLoading, setReleaseLoading] = useState(null);
   const [wlLoading, setWlLoading]       = useState(null);
   const [notify, setNotify]             = useState(true);
+
+  // ── Plates state ──────────────────────────────────────
+  const [platesOpen, setPlatesOpen]         = useState(false);
+  const [platesList, setPlatesList]         = useState([]);
+  const [platesLoading, setPlatesLoading]   = useState(false);
+  const [platesFile, setPlatesFile]         = useState(null);
+  const [platesUploading, setPlatesUploading] = useState(false);
+  const [platesResult, setPlatesResult]     = useState(null);
+  const platesFileRef = useRef(null);
 
   // ── Permanent slots state ──────────────────────────────
   const [permanents, setPermanents]         = useState([]);
@@ -127,6 +137,46 @@ export default function Manage() {
       alert(err.response?.data?.message || 'Remove failed');
     } finally {
       setPermRemoveLoading(null);
+    }
+  };
+
+  // ── Fetch plates registry ──────────────────────────────
+  const fetchPlates = useCallback(() => {
+    setPlatesLoading(true);
+    api.get('/admin/plates')
+      .then(r => { setPlatesList(r.data); setPlatesLoading(false); })
+      .catch(err => { console.error(err); setPlatesLoading(false); });
+  }, []);
+
+  const handlePlatesOpen = () => {
+    if (!platesOpen) fetchPlates();
+    setPlatesOpen(o => !o);
+    setPlatesResult(null);
+  };
+
+  const handlePlatesUpload = async () => {
+    if (!platesFile) return;
+    setPlatesUploading(true);
+    setPlatesResult(null);
+    try {
+      const buffer = await platesFile.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: 'array', raw: false });
+      const sheet = wb.Sheets['Plates'] || wb.Sheets[wb.SheetNames[0]];
+      if (!sheet) throw new Error('No sheet found in file.');
+      const rows = XLSX.utils.sheet_to_json(sheet, { raw: false });
+      const payload = rows
+        .filter(r => r.Name && r.Plate)
+        .map(r => ({ name: String(r.Name).trim(), plate: String(r.Plate).trim() }));
+      if (payload.length === 0) throw new Error('No valid rows found. Make sure columns are "Name" and "Plate".');
+      const res = await api.post('/admin/upload-plates', payload);
+      setPlatesResult(res.data);
+      setPlatesFile(null);
+      if (platesFileRef.current) platesFileRef.current.value = '';
+      fetchPlates();
+    } catch (err) {
+      setPlatesResult({ error: err.response?.data?.message || err.message });
+    } finally {
+      setPlatesUploading(false);
     }
   };
 
@@ -313,6 +363,72 @@ export default function Manage() {
             </div>
           )
         }
+      </div>
+
+      {/* ── License Plates ───────────────────────────── */}
+      <div className="manage-group">
+        <h2 className="manage-group-title plates-header" onClick={handlePlatesOpen} style={{ cursor: 'pointer' }}>
+          🚗 License Plates
+          <span className="wl-count">{platesList.length}</span>
+          <span className="plates-toggle">{platesOpen ? '▲' : '▼'}</span>
+        </h2>
+
+        {platesOpen && (
+          <div className="plates-section">
+            {/* Upload */}
+            <div className="plates-upload-row">
+              <input
+                ref={platesFileRef}
+                type="file"
+                accept=".xlsx"
+                onChange={e => { setPlatesFile(e.target.files[0] || null); setPlatesResult(null); }}
+              />
+              <button
+                className="btn-refresh"
+                onClick={handlePlatesUpload}
+                disabled={!platesFile || platesUploading}
+              >
+                {platesUploading ? 'Uploading…' : '⬆ Upload Excel'}
+              </button>
+              <button className="btn-secondary" onClick={fetchPlates}>↺ Refresh</button>
+            </div>
+
+            <p className="plates-hint">Excel sheet must be named <strong>Plates</strong> with columns <strong>Name</strong> and <strong>Plate</strong>.</p>
+
+            {platesResult && !platesResult.error && (
+              <p className="plates-result-ok">
+                ✅ {platesResult.inserted} inserted, {platesResult.updated} updated
+                {platesResult.notFound?.length > 0 && ` · Not found: ${platesResult.notFound.join(', ')}`}
+              </p>
+            )}
+            {platesResult?.error && (
+              <p className="plates-result-err">❌ {platesResult.error}</p>
+            )}
+
+            {/* Registry table */}
+            {platesLoading
+              ? <Loader text="Loading plates…" />
+              : platesList.length === 0
+                ? <p className="wl-empty">No plates registered yet.</p>
+                : (
+                  <table className="plates-table">
+                    <thead>
+                      <tr><th>Name</th><th>Plate</th><th>Phone</th></tr>
+                    </thead>
+                    <tbody>
+                      {platesList.map((p, i) => (
+                        <tr key={i}>
+                          <td>{p.name}</td>
+                          <td><code>{p.plate}</code></td>
+                          <td>{p.phone}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )
+            }
+          </div>
+        )}
       </div>
 
       {/* ── Modals ───────────────────────────────────── */}

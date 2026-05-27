@@ -328,3 +328,67 @@
   font-size: 0.65rem;
   margin-left: 0.25rem;
 }
+
+/* ── License Plates ──────────────────────────────────── */
+.plates-header {
+  user-select: none;
+}
+.plates-toggle {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+}
+.plates-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.plates-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.plates-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+.plates-result-ok {
+  font-size: 0.85rem;
+  color: #16a34a;
+  margin: 0;
+}
+.plates-result-err {
+  font-size: 0.85rem;
+  color: #dc2626;
+  margin: 0;
+}
+.plates-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.plates-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--border, #e5e7eb);
+  font-weight: 600;
+  color: #374151;
+}
+.plates-table td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+.plates-table tr:last-child td {
+  border-bottom: none;
+}
+.plates-table code {
+  font-family: monospace;
+  background: #f3f4f6;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
