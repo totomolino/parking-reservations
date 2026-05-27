@@ -165,8 +165,8 @@ export default function Manage() {
       if (!sheet) throw new Error('No sheet found in file.');
       const rows = XLSX.utils.sheet_to_json(sheet, { raw: false });
       const payload = rows
-        .filter(r => r.Name && r.Plate)
-        .map(r => ({ name: String(r.Name).trim(), plate: String(r.Plate).trim() }));
+        .filter(r => r.Phone && r.Plate)
+        .map(r => ({ name: String(r.Name || '').trim(), phone: String(r.Phone).trim(), plate: String(r.Plate).trim() }));
       if (payload.length === 0) throw new Error('No valid rows found. Make sure columns are "Name" and "Plate".');
       const res = await api.post('/admin/upload-plates', payload);
       setPlatesResult(res.data);
@@ -393,7 +393,7 @@ export default function Manage() {
               <button className="btn-secondary" onClick={fetchPlates}>↺ Refresh</button>
             </div>
 
-            <p className="plates-hint">Excel sheet must be named <strong>Plates</strong> with columns <strong>Name</strong> and <strong>Plate</strong>.</p>
+            <p className="plates-hint">Excel sheet must be named <strong>Plates</strong> with columns <strong>Name</strong>, <strong>Phone</strong> and <strong>Plate</strong>. Matching is done by phone number.</p>
 
             {platesResult && !platesResult.error && (
               <p className="plates-result-ok">
