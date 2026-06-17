@@ -22,6 +22,14 @@ export default function Manage() {
   const [wlLoading, setWlLoading]       = useState(null);
   const [notify, setNotify]             = useState(true);
 
+  // ── Blacklist state ───────────────────────────────────
+  const [blacklistOpen, setBlacklistOpen]     = useState(false);
+  const [blacklist, setBlacklist]             = useState([]);
+  const [blacklistLoading, setBlacklistLoading] = useState(false);
+  const [banQuery, setBanQuery]               = useState('');
+  const [banFiltered, setBanFiltered]         = useState([]);
+  const [banLoading, setBanLoading]           = useState(null);
+
   // ── Plates state ──────────────────────────────────────
   const [platesOpen, setPlatesOpen]         = useState(false);
   const [platesList, setPlatesList]         = useState([]);
@@ -137,6 +145,53 @@ export default function Manage() {
       alert(err.response?.data?.message || 'Remove failed');
     } finally {
       setPermRemoveLoading(null);
+    }
+  };
+
+  // ── Blacklist helpers ─────────────────────────────────
+  const fetchBlacklist = useCallback(() => {
+    setBlacklistLoading(true);
+    api.get('/admin/blacklist')
+      .then(r => { setBlacklist(r.data); setBlacklistLoading(false); })
+      .catch(err => { console.error(err); setBlacklistLoading(false); });
+  }, []);
+
+  const handleBlacklistOpen = () => {
+    if (!blacklistOpen) fetchBlacklist();
+    setBlacklistOpen(o => !o);
+  };
+
+  useEffect(() => {
+    if (!banQuery.trim()) { setBanFiltered([]); return; }
+    const q = banQuery.toLowerCase();
+    setBanFiltered(permRoster.filter(u => u.name.toLowerCase().includes(q) && !blacklist.some(b => b.id === u.id)).slice(0, 6));
+  }, [banQuery, permRoster, blacklist]);
+
+  const handleBan = async (user) => {
+    if (!window.confirm(`Ban ${user.name}? They will no longer be able to use the bot.`)) return;
+    setBanLoading(user.id);
+    try {
+      await api.post(`/admin/blacklist/${user.id}`);
+      setBanQuery('');
+      setBanFiltered([]);
+      fetchBlacklist();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to ban user');
+    } finally {
+      setBanLoading(null);
+    }
+  };
+
+  const handleUnban = async (user) => {
+    if (!window.confirm(`Unban ${user.name}?`)) return;
+    setBanLoading(user.id);
+    try {
+      await api.delete(`/admin/blacklist/${user.id}`);
+      fetchBlacklist();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to unban user');
+    } finally {
+      setBanLoading(null);
     }
   };
 
@@ -363,6 +418,76 @@ export default function Manage() {
             </div>
           )
         }
+      </div>
+
+      {/* ── Blacklist ────────────────────────────────── */}
+      <div className="manage-group">
+        <h2 className="manage-group-title plates-header" onClick={handleBlacklistOpen} style={{ cursor: 'pointer' }}>
+          🚫 Blacklist
+          <span className="wl-count">{blacklist.length}</span>
+          <span className="plates-toggle">{blacklistOpen ? '▲' : '▼'}</span>
+        </h2>
+
+        {blacklistOpen && (
+          <div className="plates-section">
+            {/* Search + ban */}
+            <div className="perm-search-wrap" style={{ maxWidth: 320 }}>
+              <input
+                className="perm-input"
+                placeholder="Search person to ban…"
+                value={banQuery}
+                onChange={e => setBanQuery(e.target.value)}
+              />
+              {banFiltered.length > 0 && (
+                <ul className="modal-suggestions perm-suggestions">
+                  {banFiltered.map(u => (
+                    <li
+                      key={u.id}
+                      className="modal-suggestion-item"
+                      onClick={() => handleBan(u)}
+                    >
+                      <span className="sug-name">{u.name}</span>
+                      <span className="sug-meta ban-badge">Ban</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <p className="plates-hint">Search and click a name to ban them. Banned users are silently ignored by the bot.</p>
+
+            {/* Current banned list */}
+            {blacklistLoading
+              ? <Loader text="Loading…" />
+              : blacklist.length === 0
+                ? <p className="wl-empty">No banned users.</p>
+                : (
+                  <table className="plates-table">
+                    <thead>
+                      <tr><th>Name</th><th>Phone</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                      {blacklist.map(u => (
+                        <tr key={u.id}>
+                          <td>{u.name}</td>
+                          <td>{u.phone}</td>
+                          <td>
+                            <button
+                              className="slot-btn slot-btn--release"
+                              style={{ padding: '0.2rem 0.6rem' }}
+                              onClick={() => handleUnban(u)}
+                              disabled={banLoading === u.id}
+                            >
+                              {banLoading === u.id ? '…' : 'Unban'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )
+            }
+          </div>
+        )}
       </div>
 
       {/* ── License Plates ───────────────────────────── */}

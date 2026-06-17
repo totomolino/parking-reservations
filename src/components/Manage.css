@@ -329,6 +329,16 @@
   margin-left: 0.25rem;
 }
 
+/* ── Blacklist ───────────────────────────────────────── */
+.ban-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--danger, #dc2626);
+  background: var(--danger-light, #fee2e2);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
 /* ── License Plates ──────────────────────────────────── */
 .plates-header {
   user-select: none;
