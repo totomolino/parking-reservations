@@ -11,6 +11,7 @@ const ParkingComparison = forwardRef(function ParkingComparison(props, ref) {
   const [loading, setLoading] = useState(true);
 
   const buildWhatsAppLink = (phone, message) => {
+    if (!phone) return '#';
     const clean = phone.replace(/\D/g, '');
     const text = encodeURIComponent(message);
     return `https://wa.me/${clean}?text=${text}`;
@@ -145,7 +146,7 @@ const ParkingComparison = forwardRef(function ParkingComparison(props, ref) {
                   <span className="slot-assigned">{slot.assignedTo}</span>
                 </div>
 
-                {selected === 'today' && slot.status !== 'available' && (
+                {selected === 'today' && slot.status !== 'available' && slot.phone && (
                   <a
                     href={buildWhatsAppLink(
                       slot.phone,
